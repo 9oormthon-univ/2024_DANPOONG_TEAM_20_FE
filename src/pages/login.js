@@ -43,6 +43,27 @@ const Login = ({ navigation }) => {
       throw error;
     }
   };
+  const getIdToken = async (accessToken) => {
+    try {
+      const response = await fetch('https://mixmix2.store/api/oauth2/callback/kakao', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,  // accessToken을 Authorization 헤더에 포함
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('idToken을 가져오는데 실패했습니다.');
+      }
+  
+      const { idToken } = await response.json();  // 서버에서 반환한 idToken을 파싱
+      console.log('idToken:', idToken);
+      return idToken;  // 받은 idToken을 반환
+    } catch (error) {
+      console.error('idToken 요청 오류:', error);
+      throw error;
+    }
+  };  
   
   const signInWithKakao = async () => {
     try {
