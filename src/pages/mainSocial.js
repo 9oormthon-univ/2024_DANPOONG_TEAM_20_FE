@@ -1,23 +1,42 @@
-import React from 'react';
-import {SafeAreaView, StyleSheet, Text, View, Pressable} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, View, Pressable } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import NavBar from '../components/navBar';
-import Header from '../components/header'; // Header 추가
 
-const MainSocial = ({navigation}) => {
+const MainSocial = ({ navigation }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (accessToken) {
+        setIsLoggedIn(true);  // 로그인 상태
+      } else {
+        setIsLoggedIn(false); // 로그인되지 않음
+      }
+    };
+    checkLoginStatus();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header 추가 */}
-      <Header navigation={navigation} />
-
       <View style={styles.content}>
-        <Text style={styles.text}>This is the MainSocial</Text>
-        {/* Login.js로 이동하는 임시 버튼 */}
-        <Pressable
-          style={styles.tempButton}
-          onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.tempButtonText}>Go to Login</Text>
-        </Pressable>
+        {isLoggedIn ? (
+          <Text style={styles.text}>상태 : 로그인o</Text>
+        ) : (
+          <Text style={styles.text}>상태 : 로그인x</Text>
+        )}
+
+        {/* 로그인되지 않은 경우만 Login 화면으로 이동 */}
+        {!isLoggedIn && (
+          <Pressable
+            style={styles.tempButton}
+            onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.tempButtonText}>Go to Login</Text>
+          </Pressable>
+        )}
       </View>
+
       {/* 하단 NavBar에 navigation 전달 */}
       <NavBar navigation={navigation} />
     </SafeAreaView>
