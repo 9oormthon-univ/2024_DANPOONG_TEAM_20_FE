@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,10 +9,12 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import NavBar from '../components/navBar';
 import Header from '../components/header';
 
-const MainSocial = ({navigation}) => {
+const MainSocial = ({ navigation }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
   const [activeTag, setActiveTag] = useState('#전체'); // 활성화된 태그 상태
   const hashtags = ['#전체', '#음식', '#K-POP', '#핫플', '#질문', '#구인']; // 해시태그 리스트
 
@@ -41,6 +43,18 @@ const MainSocial = ({navigation}) => {
       comments: 15,
     },
   ];
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      if (accessToken) {
+        setIsLoggedIn(true); // 로그인 상태
+      } else {
+        setIsLoggedIn(false); // 비로그인 상태
+      }
+    };
+    checkLoginStatus();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -72,16 +86,25 @@ const MainSocial = ({navigation}) => {
         ))}
       </ScrollView>
 
+      {/* 로그인 상태 메시지 */}
+      <View style={styles.loginStatus}>
+        {isLoggedIn ? (
+          <Text style={styles.text}>상태 : 로그인o</Text>
+        ) : (
+          <Text style={styles.text}>상태 : 로그인x</Text>
+        )}
+      </View>
+
       {/* 스크롤 가능한 콘텐츠 */}
       <FlatList
         data={data}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
           <View style={styles.postContainer}>
             {/* 프로필 영역 */}
             <View style={styles.profileContainer}>
               <Image
-                source={{uri: item.profileImage}}
+                source={{ uri: item.profileImage }}
                 style={styles.profileImage}
               />
               <View style={styles.profileText}>
@@ -95,7 +118,7 @@ const MainSocial = ({navigation}) => {
             {/* 콘텐츠 이미지 */}
             <View style={styles.contentImageContainer}>
               <Image
-                source={{uri: item.contentImage}}
+                source={{ uri: item.contentImage }}
                 style={styles.contentImage}
               />
             </View>
@@ -104,7 +127,9 @@ const MainSocial = ({navigation}) => {
             <Text style={styles.postText}>{item.text}</Text>
 
             {/* 댓글 달기 */}
-            <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
+            <Pressable onPress={() => navigation.navigate('Feed')}>
+              <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
+            </Pressable>
           </View>
         )}
       />
@@ -148,6 +173,10 @@ const styles = StyleSheet.create({
   },
   activeHashtagText: {
     color: '#fff',
+  },
+  loginStatus: {
+    marginVertical: 12,
+    paddingHorizontal: 16,
   },
   postContainer: {
     paddingHorizontal: 16,
