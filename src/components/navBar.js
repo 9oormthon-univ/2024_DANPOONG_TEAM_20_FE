@@ -1,50 +1,60 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {View, StyleSheet, Dimensions, Pressable} from 'react-native';
+import {useRoute, useFocusEffect} from '@react-navigation/native';
 import NavBackground from '../images/navBar_background.svg';
-import ProfileIcon from '../images/navBar_profile.svg';
-import CameraIcon from '../images/navBar_camera.svg';
-import DmIcon from '../images/navBar_dm.svg';
 import HomeIcon from '../images/navBar_home.svg';
+import HomeIconActive from '../images/navBar_home_active.svg';
+import DmIcon from '../images/navBar_dm.svg';
+import CameraIcon from '../images/navBar_camera.svg';
 import RankIcon from '../images/navBar_rank.svg';
+import ProfileIcon from '../images/navBar_profile.svg';
 
 const {width, height} = Dimensions.get('window');
 
+const tabs = [
+  {
+    name: 'Home',
+    routes: ['MainSocial', 'MainEdu'],
+    icon: HomeIcon,
+    activeIcon: HomeIconActive,
+  },
+  {name: 'Dm', routes: ['Dm'], icon: DmIcon},
+  {name: 'Camera', routes: ['Camera'], icon: CameraIcon},
+  {name: 'Rank', routes: ['Rank'], icon: RankIcon},
+  {name: 'Profile', routes: ['MyProfile'], icon: ProfileIcon},
+];
+
 const NavBar = ({navigation}) => {
+  const route = useRoute(); // 현재 활성화된 경로 정보 가져오기
+  const [activeTab, setActiveTab] = useState('');
+
+  useFocusEffect(() => {
+    // 현재 경로에 해당하는 탭 찾기
+    const active =
+      tabs.find(tab => tab.routes.includes(route.name))?.name || '';
+    setActiveTab(active); // 현재 활성화된 탭 업데이트
+  });
+
   return (
     <View style={styles.box}>
       <View style={styles.element}>
         <View style={styles.overlapGroup}>
           <NavBackground style={styles.navBack} />
-          {/* HomeIcon: MainSocial.js로 이동 */}
-          <Pressable
-            style={styles.home}
-            onPress={() => navigation.navigate('MainSocial')}>
-            <HomeIcon />
-          </Pressable>
-          {/* DmIcon: Dm.js로 이동 */}
-          <Pressable
-            style={styles.dm}
-            onPress={() => navigation.navigate('Dm')}>
-            <DmIcon />
-          </Pressable>
-          {/* CameraIcon: Camera.js로 이동 */}
-          <Pressable
-            style={styles.camera}
-            onPress={() => navigation.navigate('Camera')}>
-            <CameraIcon />
-          </Pressable>
-          {/* RankIcon: Rank.js로 이동 */}
-          <Pressable
-            style={styles.rank}
-            onPress={() => navigation.navigate('Rank')}>
-            <RankIcon />
-          </Pressable>
-          {/* ProfileIcon: MyProfile.js로 이동 */}
-          <Pressable
-            style={styles.profile}
-            onPress={() => navigation.navigate('MyProfile')}>
-            <ProfileIcon />
-          </Pressable>
+          {tabs.map(tab => (
+            <Pressable
+              key={tab.name}
+              style={styles[tab.name.toLowerCase()]}
+              onPress={() => {
+                setActiveTab(tab.name);
+                navigation.navigate(tab.routes[0]); // 첫 번째 경로로 이동
+              }}>
+              {activeTab === tab.name && tab.activeIcon ? (
+                <tab.activeIcon />
+              ) : (
+                <tab.icon />
+              )}
+            </Pressable>
+          ))}
         </View>
       </View>
     </View>

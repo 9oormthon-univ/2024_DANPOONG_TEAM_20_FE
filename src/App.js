@@ -2,10 +2,11 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainSocial from './pages/mainSocial';
+import MainEdu from './pages/mainEdu'; // MainEdu 추가
 import MyProfile from './pages/myProfile';
-import Dm from './pages/dm'; // Dm.js 임포트
-import Camera from './pages/camera'; // Camera.js 임포트
-import Rank from './pages/rank'; // Rank.js 임포트
+import Dm from './pages/dm';
+import Camera from './pages/camera';
+import Rank from './pages/rank';
 import Login from './pages/login';
 
 const Stack = createStackNavigator();
@@ -18,6 +19,11 @@ const App = () => {
           name="MainSocial"
           component={MainSocial}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="MainEdu"
+          component={MainEdu} // MainEdu 추가
+          options={{headerShown: false}} // 필요 시 false로 설정
         />
         <Stack.Screen
           name="Login"
