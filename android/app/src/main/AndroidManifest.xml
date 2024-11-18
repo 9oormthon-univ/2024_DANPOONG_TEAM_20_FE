@@ -11,6 +11,11 @@
         android:allowBackup="false"
         android:theme="@style/AppTheme">
 
+        <!-- Kakao SDK AppKey 설정 -->
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="ec7a9da07931368fc4bbd9b22970cc2c" />
+
         <!-- Kakao Auth 관련 Activity 설정 -->
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
@@ -20,7 +25,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:host="oauth"
-                      android:scheme="kakao{d2471c78d8ec1dafb81d2e321f34a8fc}" />
+                      android:scheme="kakaoec7a9da07931368fc4bbd9b22970cc2c" />
             </intent-filter>
         </activity>
 
