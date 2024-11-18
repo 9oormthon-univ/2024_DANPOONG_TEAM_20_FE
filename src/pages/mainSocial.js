@@ -1,10 +1,14 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, Text, View, Pressable} from 'react-native';
 import NavBar from '../components/navBar';
+import Header from '../components/header'; // Header 추가
 
 const MainSocial = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header 추가 */}
+      <Header navigation={navigation} />
+
       <View style={styles.content}>
         <Text style={styles.text}>This is the MainSocial</Text>
         {/* Login.js로 이동하는 임시 버튼 */}
