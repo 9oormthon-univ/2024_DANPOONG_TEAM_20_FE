@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Dimensions, Pressable} from 'react-native';
 import NavBackground from '../images/navBar_background.svg';
 import ProfileIcon from '../images/navBar_profile.svg';
 import CameraIcon from '../images/navBar_camera.svg';
@@ -7,18 +7,44 @@ import DmIcon from '../images/navBar_dm.svg';
 import HomeIcon from '../images/navBar_home.svg';
 import RankIcon from '../images/navBar_rank.svg';
 
-const NavBar = () => {
+const {width, height} = Dimensions.get('window');
+
+const NavBar = ({navigation}) => {
   return (
     <View style={styles.box}>
       <View style={styles.element}>
         <View style={styles.overlapGroup}>
-          {/* SVG 파일을 컴포넌트로 사용 */}
           <NavBackground style={styles.navBack} />
-          <ProfileIcon style={styles.profile} />
-          <CameraIcon style={styles.camera} />
-          <DmIcon style={styles.dm} />
-          <HomeIcon style={styles.home} />
-          <RankIcon style={styles.rank} />
+          {/* HomeIcon: MainSocial.js로 이동 */}
+          <Pressable
+            style={styles.home}
+            onPress={() => navigation.navigate('MainSocial')}>
+            <HomeIcon />
+          </Pressable>
+          {/* DmIcon: Dm.js로 이동 */}
+          <Pressable
+            style={styles.dm}
+            onPress={() => navigation.navigate('Dm')}>
+            <DmIcon />
+          </Pressable>
+          {/* CameraIcon: Camera.js로 이동 */}
+          <Pressable
+            style={styles.camera}
+            onPress={() => navigation.navigate('Camera')}>
+            <CameraIcon />
+          </Pressable>
+          {/* RankIcon: Rank.js로 이동 */}
+          <Pressable
+            style={styles.rank}
+            onPress={() => navigation.navigate('Rank')}>
+            <RankIcon />
+          </Pressable>
+          {/* ProfileIcon: MyProfile.js로 이동 */}
+          <Pressable
+            style={styles.profile}
+            onPress={() => navigation.navigate('MyProfile')}>
+            <ProfileIcon />
+          </Pressable>
         </View>
       </View>
     </View>
@@ -27,66 +53,63 @@ const NavBar = () => {
 
 const styles = StyleSheet.create({
   box: {
-    height: 92,
-    width: 393,
+    height: height * 0.12,
+    width: '100%',
   },
   element: {
-    height: 92,
+    height: '100%',
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 393,
+    width: '100%',
   },
   overlapGroup: {
-    backgroundSize: '100% 100%',
-    height: 94,
+    height: '100%',
+    width: '100%',
     position: 'relative',
-    top: -1,
-    left: -1,
-    width: 395,
   },
   profile: {
-    height: 25,
+    height: height * 0.03,
+    width: height * 0.03,
     position: 'absolute',
-    left: 332,
-    top: 21,
-    width: 21,
+    left: width * 0.85,
+    top: height * 0.02,
   },
   home: {
-    height: 24,
+    height: height * 0.03,
+    width: height * 0.03,
     position: 'absolute',
-    left: 42,
-    top: 22,
-    width: 22,
+    left: width * 0.1,
+    top: height * 0.02,
   },
   camera: {
-    height: 45,
+    height: height * 0.06,
+    width: height * 0.06,
     position: 'absolute',
-    left: 176,
-    top: 10,
-    width: 45,
+    left: width * 0.5 - height * 0.03,
+    top: height * 0.01,
   },
   rank: {
-    height: 25,
+    height: height * 0.03,
+    width: height * 0.03,
     position: 'absolute',
-    left: 264,
-    top: 21,
-    width: 25,
+    left: width * 0.68,
+    top: height * 0.02,
   },
   dm: {
-    height: 25,
+    height: height * 0.03,
+    width: height * 0.03,
     position: 'absolute',
-    left: 107,
-    top: 22,
-    width: 25,
+    left: width * 0.3,
+    top: height * 0.02,
   },
   navBack: {
-    height: 94,
-    left: 0,
+    height: '100%',
+    width: '100%',
     position: 'absolute',
     top: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.84)',
-  },  
+    left: 0,
+  },
 });
 
 export default NavBar;
