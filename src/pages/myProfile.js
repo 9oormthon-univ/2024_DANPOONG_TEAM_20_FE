@@ -10,6 +10,7 @@ import TodayQuizIcon from "../images/todayQuiz_icon.svg";
 import LineProfile from "../images/lineProfile.svg";
 import LineCalendar from "../images/lineCalendar.svg";
 import ProfileEditIcon from "../images/profileEditIcon.svg";
+import LineUnderCal from "../images/lineUnderCal.svg";
 
 export default function MyProfile() {
   const navigation = useNavigation();
@@ -145,6 +146,8 @@ export default function MyProfile() {
           ))}
         </View>
       </View>
+
+      <LineUnderCal style={styles.lineUnderCal}/>
 
       {/* 로그아웃 버튼 */}
       <View style={styles.accountContainer}>
@@ -422,5 +425,8 @@ profileNation: {
     position: "absolute",
     alignItems: "center",
     marginLeft: 4,
+  },
+  lineUnderCal: {
+    marginVertical: 26,
   }
 });
