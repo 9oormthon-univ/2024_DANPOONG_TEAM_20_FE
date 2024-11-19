@@ -1,7 +1,10 @@
 import React, {useState} from 'react';
 import {Pressable, View, Image, StyleSheet, Text} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {login} from '@react-native-seoul/kakao-login';
+
+import { login } from '@react-native-seoul/kakao-login';
+import LogoIconBig from '../images/logo_text_big.svg';
+
 
 const Login = ({navigation}) => {
   const [result, setResult] = useState('');
@@ -98,19 +101,12 @@ const Login = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>로그인 페이지</Text>
+      <LogoIconBig style={styles.logo}/>
       <Pressable style={styles.loginButton} onPress={signInWithKakao}>
         <Image
           source={require('../images/kakao_login.png')}
           style={styles.image}
         />
-      </Pressable>
-      {/* 임시 버튼: MainSocial로 이동 */}
-      <Pressable
-        style={[styles.loginButton, styles.tempButton]}
-        onPress={() => navigation.navigate('MainSocial')}>
-        <Text style={styles.tempButtonText}>임시로 MainSocial 보기</Text>
-        <Text>{result}</Text>
       </Pressable>
     </View>
   );
@@ -119,7 +115,7 @@ const Login = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
   },
@@ -134,7 +130,13 @@ const styles = StyleSheet.create({
   image: {
     width: 300,
     height: 50,
+    marginTop: 200,
     resizeMode: 'contain',
+  },
+  logo: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 130,
   },
   tempButton: {
     marginTop: 20,
