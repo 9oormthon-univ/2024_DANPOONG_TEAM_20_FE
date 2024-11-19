@@ -10,8 +10,6 @@ import {
 } from 'react-native';
 import NavBar from '../components/navBar';
 import Header from '../components/header'; // Header 추가
-import LikeIcon from '../images/like.svg'; // 좋아요 아이콘
-import CommentIcon from '../images/comment.svg'; // 댓글 아이콘
 import OptionIcon from '../images/option.svg'; // 더보기 아이콘
 
 const MainEdu = ({navigation}) => {
@@ -28,8 +26,6 @@ const MainEdu = ({navigation}) => {
       time: '9시간 전',
       contentImage: 'https://via.placeholder.com/300',
       text: '한국어 공부 중ㅎㅎ 함께 할 사람 있나요?',
-      likes: 115,
-      comments: 75,
     },
     {
       id: '2',
@@ -39,8 +35,6 @@ const MainEdu = ({navigation}) => {
       time: '2시간 전',
       contentImage: 'https://via.placeholder.com/300',
       text: 'React Native 배우기 시작했어요!',
-      likes: 97,
-      comments: 34,
     },
   ];
 
@@ -78,47 +72,42 @@ const MainEdu = ({navigation}) => {
           <View style={styles.postContainer}>
             {/* 프로필 영역 */}
             <View style={styles.profileContainer}>
-              <Image
-                source={{uri: item.profileImage}}
-                style={styles.profileImage}
-              />
-              <View style={styles.profileText}>
-                <Text style={styles.name}>
-                  {item.name} <Text style={styles.flag}>{item.flag}</Text>
-                </Text>
-                <Text style={styles.time}>{item.time}</Text>
+              <View style={styles.profileInfo}>
+                <Image
+                  source={{uri: item.profileImage}}
+                  style={styles.profileImage}
+                />
+                <View style={styles.profileText}>
+                  <Text style={styles.name}>
+                    {item.name} <Text style={styles.flag}>{item.flag}</Text>
+                  </Text>
+                  <Text style={styles.time}>{item.time}</Text>
+                </View>
               </View>
+              <Pressable style={styles.optionButton}>
+                <OptionIcon width={20} height={20} />
+              </Pressable>
             </View>
 
             {/* 콘텐츠 이미지 */}
-            <View style={styles.contentImageContainer}>
-              <Image
-                source={{uri: item.contentImage}}
-                style={styles.contentImage}
-              />
-              {/* 이미지 위 좋아요, 댓글, 더보기 버튼 */}
-              <View style={styles.imageOverlay}>
-                <View style={styles.actionsContainer}>
-                  <View style={styles.action}>
-                    <LikeIcon width={20} height={20} />
-                    <Text style={styles.actionText}>{item.likes}</Text>
-                  </View>
-                  <View style={styles.action}>
-                    <CommentIcon width={20} height={20} />
-                    <Text style={styles.actionText}>{item.comments}</Text>
-                  </View>
-                  <Pressable style={styles.optionButton}>
-                    <OptionIcon width={20} height={20} />
-                  </Pressable>
-                </View>
+            <Pressable onPress={() => navigation.navigate('Feed')}>
+              <View style={styles.contentImageContainer}>
+                <Image
+                  source={{uri: item.contentImage}}
+                  style={styles.contentImage}
+                />
               </View>
-            </View>
+            </Pressable>
 
             {/* 게시글 텍스트 */}
-            <Text style={styles.postText}>{item.text}</Text>
+            <Pressable onPress={() => navigation.navigate('Feed')}>
+              <Text style={styles.postText}>{item.text}</Text>
+            </Pressable>
 
             {/* 댓글 달기 */}
-            <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
+            <Pressable onPress={() => navigation.navigate('Feed')}>
+              <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
+            </Pressable>
           </View>
         )}
       />
@@ -170,7 +159,12 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', // 오른쪽 정렬
     marginBottom: 8,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   profileImage: {
     width: 40,
@@ -204,28 +198,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  actionsContainer: {
-    alignItems: 'center',
-  },
-  action: {
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#fff',
-    marginTop: 4,
-  },
   optionButton: {
-    alignSelf: 'flex-end',
+    marginRight: 8, // 오른쪽 여백
   },
   postText: {
     fontSize: 14,
