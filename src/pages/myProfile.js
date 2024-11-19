@@ -132,6 +132,10 @@ export default function MyProfile() {
             ))}
           </View>
           <LineCalendar style={styles.lineCalendarLine} />
+          <LineCalendar style={styles.lineCalendarLine1}/>
+          <LineCalendar style={styles.lineCalendarLine2}/>
+          <LineCalendar style={styles.lineCalendarLine3}/>
+          <LineCalendar style={styles.lineCalendarLine4}/>
           <View style={styles.calendarDates}>
             {[...Array(31)].map((_, index) => (
               <View key={index} style={styles.date}>
@@ -143,6 +147,7 @@ export default function MyProfile() {
         </View>
 
         <LineUnderCal style={styles.lineUnderCal} />
+        
 
         {/* 로그아웃 버튼 */}
         <View style={styles.accountContainer}>
@@ -345,13 +350,10 @@ profileNation: {
   },
   date: {
     flex: 1,
-    // width: "13%",
     alignItems: "center",
     marginVertical: 8,
     flexBasis: '14.28%',
-    // justifyContent: "center",
     maxWidth: "14.28%",
-    // color: "#999999",
   },
   dateText: {
     fontSize: 14,
