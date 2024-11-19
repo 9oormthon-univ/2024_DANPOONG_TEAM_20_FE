@@ -11,35 +11,33 @@ import LineProfile from "../images/lineProfile.svg";
 import LineCalendar from "../images/lineCalendar.svg";
 import ProfileEditIcon from "../images/profileEditIcon.svg";
 import LineUnderCal from "../images/lineUnderCal.svg";
+import NavBar from "../components/navBar";
 
 export default function MyProfile() {
   const navigation = useNavigation();
-  const [userInfo, setUserInfo] = useState(null); // 사용자 정보 상태
-  const [loading, setLoading] = useState(true);  // 로딩 상태 처리 (아마 나중에 할 듯. 대충 설정만 해둠)
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // AsyncStorage에서 사용자 정보 가져오기
+  // 사용자 정보 불러오기
   const loadUserInfo = async () => {
     try {
-      const storedUserInfo = await AsyncStorage.getItem("userInfo"); // 로그인 시 저장된 데이터
+      const storedUserInfo = await AsyncStorage.getItem("userInfo");
       if (storedUserInfo) {
         setUserInfo(JSON.parse(storedUserInfo));
       }
     } catch (error) {
       console.error("사용자 정보 가져오기 오류:", error);
     } finally {
-      setLoading(false); // 로딩 완료
+      setLoading(false);
     }
   };
 
   // 로그아웃 핸들러
   const handleLogout = async () => {
     try {
-      // 저장된 토큰 및 사용자 정보 삭제
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
       await AsyncStorage.removeItem("userInfo");
-
-      // 로그인 화면으로 이동
       navigation.replace("Login");
     } catch (error) {
       console.error("로그아웃 오류:", error);
@@ -47,7 +45,7 @@ export default function MyProfile() {
   };
 
   useEffect(() => {
-    loadUserInfo(); // 컴포넌트 로드 시 사용자 정보 가져오기
+    loadUserInfo();
   }, []);
 
   if (loading) {
@@ -59,106 +57,111 @@ export default function MyProfile() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* 헤더 */}
-      <Header2 />
+    <View style={styles.container}>
+      {/* 스크롤 가능한 영역 */}
+      <ScrollView style={styles.scrollView}>
+        {/* 헤더 */}
+        <Header2 />
 
-      {/* 프로필 섹션 */}
-      <View style={styles.profileSection}>
-      <View style={styles.streak}>
-          <StreakIcon style={styles.streakIcon} />
-          <Text style={styles.streakNumber}>178</Text>
-        </View>
-        <Text style={styles.universityName}>구름대학교</Text>
+        {/* 프로필 섹션 */}
+        <View style={styles.profileSection}>
+          <View style={styles.streak}>
+            <StreakIcon style={styles.streakIcon} />
+            <Text style={styles.streakNumber}>178</Text>
+          </View>
+          <Text style={styles.universityName}>구름대학교</Text>
 
-        {/* 프로필 이미지 */}
-        <View style={styles.profileImageContainer}>
-          <Svg width={155} height={150}>
-            <Defs>
-              <ClipPath id="mixmix">
-                <Path d="M77.5 23.3165C17.5702 -29.9316 -30.9666 17.0581 24.073 75C-30.9666 132.994 17.5702 179.984 77.5 126.684C137.43 179.932 185.967 132.942 130.927 75C185.967 17.006 137.43 -29.9838 77.5 23.3165Z" fill="#7DC353" />
-              </ClipPath>
-            </Defs>
-            <SvgImage
-              href={userInfo?.profileImageUrl || "https://via.placeholder.com/120"} // 프로필 이미지 URL
-              width="100%"
-              height="100%"
-              clipPath="url(#mixmix)"
-              preserveAspectRatio="xMidYMid slice"
-            />
-          </Svg>
-          <BadgeIcon style={styles.badge} />
-          <ProfileEditIcon style={styles.editIcon} />
-        </View>
+          {/* 프로필 이미지 */}
+          <View style={styles.profileImageContainer}>
+            <Svg width={155} height={150}>
+              <Defs>
+                <ClipPath id="mixmix">
+                  <Path d="M77.5 23.3165C17.5702 -29.9316 -30.9666 17.0581 24.073 75C-30.9666 132.994 17.5702 179.984 77.5 126.684C137.43 179.932 185.967 132.942 130.927 75C185.967 17.006 137.43 -29.9838 77.5 23.3165Z" />
+                </ClipPath>
+              </Defs>
+              <SvgImage
+                href={userInfo?.profileImageUrl || "https://via.placeholder.com/120"}
+                width="100%"
+                height="100%"
+                clipPath="url(#mixmix)"
+                preserveAspectRatio="xMidYMid slice"
+              />
+            </Svg>
+            <BadgeIcon style={styles.badge} />
+            <ProfileEditIcon style={styles.editIcon} />
+          </View>
 
-        {/* 사용자 이름 및 국가 */}
-        <View style={styles.profileNameContainer}>
-          <Text style={styles.profileName}>{userInfo?.nickname || "사용자"}</Text>
-          <Text style={styles.profileNation}>· {userInfo?.nation || "국가 🇰🇷"}</Text>
-        </View>
-
-        <Text style={styles.message}>저와 동네친구 할래요?</Text>
-      </View>
-
-      {/* 올린 게시글 섹션 */}
-      <View style={styles.postsSection}>
-        <View style={styles.postCategory}>
-          <Text style={[styles.postLabel, { color: "#ff6152" }]}>Social</Text>
-          <Text style={styles.postCount}>45</Text>
-        </View>
-        <LineProfile />
-        <View style={styles.postCategory}>
-          <Text style={[styles.postLabel, { color: "#7dc353" }]}>Edu</Text>
-          <Text style={styles.postCount}>51</Text>
-        </View>
-      </View>
-
-      {/* 퀴즈 섹션 */}
-      <View style={styles.quizSection}>
-        <TodayQuizIcon style={styles.quizIcon} />
-        <View style={styles.textGroup}>
-          <Text style={styles.quizTitle}>오늘의 퀴즈</Text>
-          <Text style={styles.quizSubtitle}>오늘의 퀴즈 풀고 Streak 채워봐요</Text>
-        </View>
-      </View>
-
-      {/* 캘린더 섹션 */}
-      <View style={styles.calendarSection}>
-        <View style={styles.weekDays}>
-          {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => (
-            <Text key={index} style={styles.weekDay}>
-              {day}
+          <View style={styles.profileNameContainer}>
+            <Text style={styles.profileName}>{userInfo?.nickname || "사용자"}</Text>
+            <Text style={styles.profileNation}>
+              · {userInfo?.nation || "국가 🇰🇷"}
             </Text>
-          ))}
+          </View>
+          <Text style={styles.message}>저와 동네친구 할래요?</Text>
         </View>
-        <LineCalendar style={styles.lineCalendarLine} />
-        <LineCalendar style={styles.lineCalendarLine1}/>
-        <LineCalendar style={styles.lineCalendarLine2}/>
-        <LineCalendar style={styles.lineCalendarLine3}/>
-        <LineCalendar style={styles.lineCalendarLine4}/>
-        <View style={styles.calendarDates}>
-          {/* 날짜 데이터: 동적으로 렌더링 */}
-          {[...Array(31)].map((_, index) => (
-            <View key={index} style={styles.date}>
-              <Text style={styles.dateText}>{index + 1}</Text>
-              {index < 30 && <Text style={styles.dateSubtext}>더미 텍스트</Text>}
-            </View>
-          ))}
+
+        {/* 올린 게시글 섹션 */}
+        <View style={styles.postsSection}>
+          <View style={styles.postCategory}>
+            <Text style={[styles.postLabel, { color: "#ff6152" }]}>Social</Text>
+            <Text style={styles.postCount}>45</Text>
+          </View>
+          <LineProfile />
+          <View style={styles.postCategory}>
+            <Text style={[styles.postLabel, { color: "#7dc353" }]}>Edu</Text>
+            <Text style={styles.postCount}>51</Text>
+          </View>
         </View>
+
+        {/* 퀴즈 섹션 */}
+        <View style={styles.quizSection}>
+          <TodayQuizIcon style={styles.quizIcon} />
+          <View style={styles.textGroup}>
+            <Text style={styles.quizTitle}>오늘의 퀴즈</Text>
+            <Text style={styles.quizSubtitle}>오늘의 퀴즈 풀고 Streak 채워봐요</Text>
+          </View>
+        </View>
+
+        {/* 캘린더 섹션 */}
+        <View style={styles.calendarSection}>
+          <View style={styles.weekDays}>
+            {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => (
+              <Text key={index} style={styles.weekDay}>
+                {day}
+              </Text>
+            ))}
+          </View>
+          <LineCalendar style={styles.lineCalendarLine} />
+          <View style={styles.calendarDates}>
+            {[...Array(31)].map((_, index) => (
+              <View key={index} style={styles.date}>
+                <Text style={styles.dateText}>{index + 1}</Text>
+                {index < 30 && <Text style={styles.dateSubtext}>더미 텍스트</Text>}
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <LineUnderCal style={styles.lineUnderCal} />
+
+        {/* 로그아웃 버튼 */}
+        <View style={styles.accountContainer}>
+          <Text style={styles.accountTitle}>내 계정</Text>
+          <Text style={styles.accountEmail}>
+            {userInfo?.email || "이메일 정보 없음"}
+          </Text>
+
+          <Pressable style={styles.logoutContainer} onPress={handleLogout}>
+            <Text style={styles.logoutText}>로그아웃</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+
+      {/* 하단 네비게이션 */}
+      <View style={styles.navBarContainer}>
+        <NavBar navigation={navigation} />
       </View>
-
-      <LineUnderCal style={styles.lineUnderCal}/>
-
-      {/* 로그아웃 버튼 */}
-      <View style={styles.accountContainer}>
-        <Text style={styles.accountTitle}>내 계정</Text>
-        <Text style={styles.accountEmail}>{userInfo?.email || "이메일 정보 없음"}</Text>
-
-        <Pressable style={styles.logoutContainer} onPress={handleLogout}>
-          <Text style={styles.logoutText}>로그아웃</Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+    </View>
   );
 }
 
