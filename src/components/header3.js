@@ -7,7 +7,6 @@ const Header2 = () => {
 
   return (
     <View style={styles.container}>
-      {/* 가운데 이름 */}
       <Text style={styles.mypageText}>
         마이페이지
       </Text>
