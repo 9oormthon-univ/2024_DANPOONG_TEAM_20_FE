@@ -9,7 +9,7 @@ import Dm from './pages/dm';
 import Camera from './pages/camera';
 import Rank from './pages/rank';
 import Login from './pages/login';
-import Feed from './pages/feed'; // Feed 추가
+import Feed from './pages/feed';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +33,10 @@ const App = () => {
           name="MainSocial"
           component={MainSocial}
           options={{headerShown: false}}
+        <Stack.Screen
+          name="Feed"
+          component={Feed}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="MainEdu"
@@ -53,6 +57,7 @@ const App = () => {
           name="MyProfile"
           component={MyProfile}
           options={{headerShown: false}}
+
         />
         <Stack.Screen
           name="Dm"
