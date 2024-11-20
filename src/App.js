@@ -79,7 +79,7 @@ const App = () => {
         <Stack.Screen
           name="Rank"
           component={Rank}
-          options={{title: 'Ranking'}}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
     </NavigationContainer>

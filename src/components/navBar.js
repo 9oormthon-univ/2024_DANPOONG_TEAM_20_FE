@@ -7,7 +7,9 @@ import HomeIconActive from '../images/navBar_home_active.svg';
 import DmIcon from '../images/navBar_dm.svg';
 import CameraIcon from '../images/navBar_camera.svg';
 import RankIcon from '../images/navBar_rank.svg';
+import RankIconActive from '../images/navBar_rank_active.svg';
 import ProfileIcon from '../images/navBar_profile.svg';
+import ProfileIconActive from '../images/navBar_profile_active.svg';
 
 const {width, height} = Dimensions.get('window');
 
@@ -20,8 +22,13 @@ const tabs = [
   },
   {name: 'Dm', routes: ['Dm'], icon: DmIcon},
   {name: 'Camera', routes: ['Camera'], icon: CameraIcon},
-  {name: 'Rank', routes: ['Rank'], icon: RankIcon},
-  {name: 'Profile', routes: ['MyProfile'], icon: ProfileIcon},
+  {name: 'Rank', routes: ['Rank'], icon: RankIcon, activeIcon: RankIconActive},
+  {
+    name: 'Profile',
+    routes: ['MyProfile'],
+    icon: ProfileIcon,
+    activeIcon: ProfileIconActive,
+  },
 ];
 
 const NavBar = ({navigation}) => {

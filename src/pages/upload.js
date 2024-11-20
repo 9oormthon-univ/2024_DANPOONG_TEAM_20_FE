@@ -36,6 +36,11 @@ const Upload = ({route, navigation}) => {
     );
   };
 
+  const handleCategoryChange = category => {
+    setSelectedCategory(category);
+    setSelectedTags([]); // 카테고리가 변경되면 선택된 해시태그 초기화
+  };
+
   const handleShare = () => {
     const postData = {
       text: postText,
@@ -91,7 +96,7 @@ const Upload = ({route, navigation}) => {
                 styles.categoryButton,
                 selectedCategory === category && styles.selectedCategoryButton,
               ]}
-              onPress={() => setSelectedCategory(category)}>
+              onPress={() => handleCategoryChange(category)}>
               <Text
                 style={[
                   styles.categoryText,
@@ -113,13 +118,19 @@ const Upload = ({route, navigation}) => {
               key={tag}
               style={[
                 styles.hashtagButton,
-                selectedTags.includes(tag) && styles.selectedHashtagButton,
+                selectedTags.includes(tag) &&
+                  (tag === '#질문' || tag === '#구인'
+                    ? styles.specialSelectedHashtagButton
+                    : styles.selectedHashtagButton),
               ]}
               onPress={() => toggleTag(tag)}>
               <Text
                 style={[
                   styles.hashtagText,
-                  selectedTags.includes(tag) && styles.selectedHashtagText,
+                  selectedTags.includes(tag) &&
+                    (tag === '#질문' || tag === '#구인'
+                      ? styles.specialSelectedHashtagText
+                      : styles.selectedHashtagText),
                 ]}>
                 {tag}
               </Text>
@@ -136,6 +147,7 @@ const Upload = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  // 기존 스타일 유지
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -225,11 +237,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6152',
     borderColor: '#FF6152',
   },
+  specialSelectedHashtagButton: {
+    backgroundColor: '#767676',
+    borderColor: 'transparent',
+  },
   hashtagText: {
     fontSize: width * 0.04,
     color: '#333',
   },
   selectedHashtagText: {
+    color: '#fff',
+  },
+  specialSelectedHashtagText: {
     color: '#fff',
   },
   shareButton: {
