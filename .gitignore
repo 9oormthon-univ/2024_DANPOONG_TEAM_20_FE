@@ -65,5 +65,3 @@ buck-out/
 # React Native
 android/app/build/
 ios/build/
-yarn.lock
-package-lock.json
