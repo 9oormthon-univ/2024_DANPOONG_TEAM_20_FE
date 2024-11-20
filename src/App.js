@@ -35,6 +35,7 @@ const App = () => {
           name="MainSocial"
           component={MainSocial}
           options={{headerShown: false}}
+        />
         <Stack.Screen
           name="Feed"
           component={Feed}
@@ -45,11 +46,6 @@ const App = () => {
           component={MainEdu}
           options={{headerShown: false}}
         />
-        {/* <Stack.Screen
-          name="Feed" // Feed 화면 추가
-          component={Feed}
-          options={{headerShown: false}}
-        /> */}
         <Stack.Screen
           name="Login"
           component={Login}
@@ -59,7 +55,6 @@ const App = () => {
           name="MyProfile"
           component={MyProfile}
           options={{headerShown: false}}
-
         />
         <Stack.Screen
           name="Dm"

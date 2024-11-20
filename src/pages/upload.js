@@ -44,8 +44,14 @@ const Upload = ({route, navigation}) => {
       photo: photo?.path,
     };
 
-    Alert.alert('게시물 데이터', JSON.stringify(postData, null, 2));
-    navigation.navigate('Feed', {postData});
+    // Social과 Edu에 따라 다른 화면으로 이동
+    if (selectedCategory === 'Social') {
+      navigation.navigate('MainSocial', {postData});
+    } else if (selectedCategory === 'Edu') {
+      navigation.navigate('MainEdu', {postData});
+    } else {
+      Alert.alert('알림', '올바른 카테고리를 선택하세요.');
+    }
   };
 
   return (
