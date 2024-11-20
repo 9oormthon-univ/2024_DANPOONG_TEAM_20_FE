@@ -18,7 +18,7 @@ export default function ProfileEdit() {
 
     // 입력 필드별 상태
     const [nickname, setNickname] = useState("");
-    const [university, setUniversity] = useState("");
+    const [school, setSchool] = useState("");
     const [introduction, setIntroduction] = useState("");
   
     // 사용자 정보 불러오기
@@ -31,7 +31,7 @@ export default function ProfileEdit() {
   
           // 초기값 설정
           setNickname(parsedUserInfo.nickname || "");
-          setUniversity(parsedUserInfo.university || "");
+          setSchool(parsedUserInfo.school || "");
           setIntroduction(parsedUserInfo.introduction || "");
         }
       } catch (error) {
@@ -48,7 +48,7 @@ export default function ProfileEdit() {
         const updatedUserInfo = {
           ...userInfo,
           nickname: nickname || userInfo?.nickname || "",
-          university: university || userInfo?.university || "",
+          school: school || userInfo?.school || "",
           introduction: introduction || userInfo?.introduction || "",
         };
   
@@ -56,7 +56,7 @@ export default function ProfileEdit() {
         await AsyncStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
         setUserInfo(updatedUserInfo);
   
-        alert("수정이 완료되었습니다!");
+        // alert("수정이 완료되었습니다!");
         navigation.navigate("MyProfile");
         handleProfileEdit();
 
@@ -122,8 +122,8 @@ export default function ProfileEdit() {
             <Text style={styles.editField}>학교명</Text>
             <TextInput
               style={styles.input}
-              value={university}
-              onChangeText={setUniversity}
+              value={school}
+              onChangeText={school}
               placeholder="학교명을 입력하세요"
               placeholderTextColor="#d9d9d9"
             />
