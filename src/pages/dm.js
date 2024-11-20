@@ -17,7 +17,7 @@ const Dm = ({ route }) => {
     };
 
     // 기존 메시지 불러오기
-    fetch(`https://your-server.com/api/messages?recipientId=${recipientId}`)
+    fetch(`https://mixmix2.store/api/chat-rooms?recipientId=${recipientId}`)
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch((err) => console.error("메시지 로드 오류:", err));
@@ -67,13 +67,46 @@ const Dm = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  myMessage: { alignSelf: "flex-end", padding: 10, backgroundColor: "#d1f5d3", marginVertical: 5, borderRadius: 10 },
-  theirMessage: { alignSelf: "flex-start", padding: 10, backgroundColor: "#f1f1f1", marginVertical: 5, borderRadius: 10 },
-  inputContainer: { flexDirection: "row", alignItems: "center", marginTop: 10 },
-  input: { flex: 1, borderWidth: 1, borderColor: "#ccc", borderRadius: 10, padding: 10 },
-  sendButton: { marginLeft: 10, backgroundColor: "#007BFF", padding: 10, borderRadius: 10 },
-  sendButtonText: { color: "#fff", fontWeight: "bold" },
+  container: { 
+    flex: 1, 
+    padding: 20 
+},
+  myMessage: { 
+    alignSelf: "flex-end", 
+    padding: 10, 
+    backgroundColor: "#d1f5d3", 
+    marginVertical: 5, 
+    borderRadius: 10 
+},
+  theirMessage: { 
+    alignSelf: "flex-start", 
+    padding: 10, 
+    backgroundColor: "#f1f1f1", 
+    marginVertical: 5, 
+    borderRadius: 10 
+},
+  inputContainer: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    marginTop: 10 
+},
+  input: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderColor: "#ccc", 
+    borderRadius: 10, 
+    padding: 10 
+},
+  sendButton: { 
+    marginLeft: 10, 
+    backgroundColor: "#007BFF", 
+    padding: 10, 
+    borderRadius: 10 
+},
+  sendButtonText: { 
+    color: "#fff", 
+    fontWeight: "bold" 
+},
 });
 
 export default Dm;
