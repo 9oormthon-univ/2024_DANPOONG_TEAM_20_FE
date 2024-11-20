@@ -79,7 +79,7 @@ export default function MyProfile() {
             <StreakIcon style={styles.streakIcon} />
             <Text style={styles.streakNumber}>178</Text>
           </View>
-          <Text style={styles.universityName}>{userInfo.university}</Text>
+          <Text style={styles.universityName}>{userInfo.school}</Text>
 
           {/* 프로필 이미지 */}
           <View style={styles.profileImageContainer}>

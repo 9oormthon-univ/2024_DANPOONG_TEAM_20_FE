@@ -123,7 +123,7 @@ export default function ProfileEdit() {
             <TextInput
               style={styles.input}
               value={school}
-              onChangeText={school}
+              onChangeText={setSchool}
               placeholder="학교명을 입력하세요"
               placeholderTextColor="#d9d9d9"
             />
