@@ -33,17 +33,21 @@ const App = () => {
           name="MainSocial"
           component={MainSocial}
           options={{headerShown: false}}
+        <Stack.Screen
+          name="Feed"
+          component={Feed}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="MainEdu"
           component={MainEdu}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name="Feed"
+        {/* <Stack.Screen
+          name="Feed" // Feed 화면 추가
           component={Feed}
           options={{headerShown: false}}
-        />
+        /> */}
         <Stack.Screen
           name="Login"
           component={Login}
@@ -52,7 +56,8 @@ const App = () => {
         <Stack.Screen
           name="MyProfile"
           component={MyProfile}
-          options={{title: 'My Profile'}}
+          options={{headerShown: false}}
+
         />
         <Stack.Screen
           name="Dm"
