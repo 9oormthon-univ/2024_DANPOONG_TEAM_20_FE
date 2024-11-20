@@ -7,9 +7,11 @@ import MainEdu from './pages/mainEdu';
 import MyProfile from './pages/myProfile';
 import Dm from './pages/dm';
 import Camera from './pages/camera';
+import PhotoReview from './pages/photoReview'; // 추가된 PhotoReview
 import Rank from './pages/rank';
 import Login from './pages/login';
 import Feed from './pages/feed';
+import Upload from './pages/upload'; // 추가된 Upload
 
 const Stack = createStackNavigator();
 
@@ -62,7 +64,17 @@ const App = () => {
         <Stack.Screen
           name="Camera"
           component={Camera}
-          options={{title: 'Camera'}}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="PhotoReview" // 새로 추가된 스크린
+          component={PhotoReview}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Upload" // 새로 추가된 스크린
+          component={Upload}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="Rank"
