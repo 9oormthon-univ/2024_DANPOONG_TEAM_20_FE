@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   contentImage: {
     width: '100%',
-    aspectRatio: 1, // 정사각형 비율
+    aspectRatio: 1,
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -218,13 +218,13 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 20,
     paddingLeft: 16,
-    paddingRight: 50, // 버튼 공간 확보
+    paddingRight: 50,
     fontSize: 14,
     color: '#333',
   },
   sendCommentInsideButton: {
     position: 'absolute',
-    right: 8,
+    right: 22,
     height: 30,
     width: 50,
     justifyContent: 'center',
