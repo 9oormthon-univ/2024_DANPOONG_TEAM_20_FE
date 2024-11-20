@@ -10,7 +10,7 @@ const DmList = () => {
     fetch("https://mixmix2.store")
       .then((res) => res.json())
       .then((data) => setChatList(data))
-      .catch((err) => console.error("채팅 리스트 로드 오류:", err));
+      .catch((err) => console.error("로드 오류:", err));
   }, []);
 
   return (
@@ -33,10 +33,23 @@ const DmList = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  chatItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: "#ccc" },
-  name: { fontSize: 18, fontWeight: "bold" },
-  lastMessage: { fontSize: 14, color: "#777" },
+  container: { 
+    flex: 1, 
+    padding: 20 
+  },
+  chatItem: { 
+    padding: 15, 
+    borderBottomWidth: 1, 
+    borderBottomColor: "#ccc" 
+  },
+  name: { 
+    fontSize: 18, 
+    fontWeight: "bold" 
+  },
+  lastMessage: { 
+    fontSize: 14, 
+    color: "#777" 
+  },
 });
 
 export default DmList;
