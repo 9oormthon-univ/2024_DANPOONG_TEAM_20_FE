@@ -12,11 +12,20 @@ import LineCalendar from "../images/lineCalendar.svg";
 import ProfileEditIcon from "../images/profileEditIcon.svg";
 import LineUnderCal from "../images/lineUnderCal.svg";
 import NavBar from "../components/navBar";
+import ProfileEdit from "./profileEdit";
 
 export default function MyProfile() {
-  const navigation = useNavigation();
+  const navigation = useNavigation(); 
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false); // 프로필 편집 여부 상태
+
+  useEffect(() => {
+    loadUserInfo();
+  }, []);
+  const handleProfileEdit = () => {
+    setIsEditing(true); // 프로필 편집 화면으로 전환
+  };
 
   // 사용자 정보 불러오기
   const loadUserInfo = async () => {
@@ -44,9 +53,10 @@ export default function MyProfile() {
     }
   };
 
-  useEffect(() => {
-    loadUserInfo();
-  }, []);
+
+  if (isEditing) {
+    return <ProfileEdit />; // ProfileEdit 컴포넌트 렌더링
+  }
 
   if (loading) {
     return (
@@ -69,7 +79,7 @@ export default function MyProfile() {
             <StreakIcon style={styles.streakIcon} />
             <Text style={styles.streakNumber}>178</Text>
           </View>
-          <Text style={styles.universityName}>구름대학교</Text>
+          <Text style={styles.universityName}>{userInfo.university}</Text>
 
           {/* 프로필 이미지 */}
           <View style={styles.profileImageContainer}>
@@ -88,7 +98,9 @@ export default function MyProfile() {
               />
             </Svg>
             <BadgeIcon style={styles.badge} />
-            <ProfileEditIcon style={styles.editIcon} />
+              <Pressable onPress={handleProfileEdit}>
+              <ProfileEditIcon style={styles.editIcon} />
+            </Pressable>
           </View>
 
           <View style={styles.profileNameContainer}>
@@ -97,7 +109,7 @@ export default function MyProfile() {
               · {userInfo?.nation || "국가 🇰🇷"}
             </Text>
           </View>
-          <Text style={styles.message}>저와 동네친구 할래요?</Text>
+          <Text style={styles.message}>{userInfo.introduction}</Text>
         </View>
 
         {/* 올린 게시글 섹션 */}
