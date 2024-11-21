@@ -11147,6 +11147,11 @@ react-native-codegen@^0.70.7:
     jscodeshift "^0.14.0"
     nullthrows "^1.1.1"
 
+react-native-country-flag@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.npmjs.org/react-native-country-flag/-/react-native-country-flag-2.0.2.tgz"
+  integrity sha512-5LMWxS79ZQ0Q9ntYgDYzWp794+HcQGXQmzzZNBR1AT7z5HcJHtX7rlk8RHi7RVzfp5gW6plWSZ4dKjRpu/OafQ==
+
 react-native-event-source@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/react-native-event-source/-/react-native-event-source-1.1.0.tgz"
