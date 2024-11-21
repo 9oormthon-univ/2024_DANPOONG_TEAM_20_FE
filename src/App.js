@@ -11,9 +11,8 @@ import PhotoReview from './pages/photoReview';
 import Rank from './pages/rank';
 import Login from './pages/login';
 import Feed from './pages/feed';
-import Upload from './pages/upload'; // 추가된 Upload
-import ProfileInfo from './pages/profileInfo';
-import Notification from './pages/notification';
+import Upload from './pages/upload';
+import Quiz from './pages/quiz';
 
 const Stack = createStackNavigator();
 
@@ -37,16 +36,6 @@ const App = () => {
           name="MainSocial"
           component={MainSocial}
           options={{headerShown: false}}
-        />
-        <Stack.Screen 
-        name="ProfileInfo" 
-        component={ProfileInfo} 
-        options={{headerShown: false}}
-        />
-        <Stack.Screen
-        name="Notification"
-        component={Notification}
-        options={{headerShown: false}}
         />
         <Stack.Screen
           name="Feed"
