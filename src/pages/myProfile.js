@@ -18,7 +18,7 @@ export default function MyProfile() {
   const navigation = useNavigation(); 
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false); // 프로필 편집 여부 상태
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     loadUserInfo();

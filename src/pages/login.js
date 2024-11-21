@@ -3,31 +3,34 @@ import { Pressable, View, Image, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login, getProfile } from '@react-native-seoul/kakao-login';
 import LogoIconBig from '../images/logo_text_big.svg';
-import { useNavigation } from '@react-navigation/native'; // 추가: navigation 사용
+import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
   const [result, setResult] = useState('');
-  const navigation = useNavigation(); // navigation 객체를 useNavigation 훅으로 가져옵니다.
+  const navigation = useNavigation();
 
   // 로그인 처리
   const signInWithKakao = async () => {
     try {
-      // 일단 다 초기화
+      // 초기화 (저장된 모든 데이터 삭제)
       await AsyncStorage.removeItem('kakaoToken');
       await AsyncStorage.removeItem('accessToken');
       await AsyncStorage.removeItem('refreshToken');
       await AsyncStorage.removeItem('userInfo');
 
+      // 카카오 로그인
       const token = await login();
       console.log('로그인 성공, 토큰: ', token);
-      setResult(JSON.stringify(token));
+      setResult('로그인 성공, 토큰: ' + JSON.stringify(token));
+
+      // 토큰 저장
       await AsyncStorage.setItem('kakaoToken', token.accessToken);
 
-      // 카카오 사용자 프로필 정보 가져오기
+      // 사용자 프로필 정보 가져오기
       const userProfile = await getProfile();
       console.log('사용자 프로필:', userProfile);
 
-      // 사용자 정보 확인 및 기본값 설정
+      // 사용자 정보 저장
       const profileData = {
         email: userProfile.email || '',
         nickname: userProfile.nickname || '',
@@ -36,11 +39,9 @@ const Login = () => {
         school: 'unknown',
         introduction: 'unknown',
       };
-
-      // AsyncStorage에 사용자 정보 저장
       await AsyncStorage.setItem('userInfo', JSON.stringify(profileData));
 
-      // idToken을 사용하여 서버에서 accessToken과 refreshToken 받기
+      // 서버에서 accessToken과 refreshToken 받기
       const tokens = await getTokens(token.idToken);
 
       if (tokens) {
@@ -51,11 +52,12 @@ const Login = () => {
         );
 
         // ProfileInfo 페이지로 프로필 데이터와 함께 이동
-        navigation.navigate('ProfileInfo', { profileData }); // 프로필 데이터 전달
+        navigation.navigate('ProfileInfo', { profileData });
       }
     } catch (err) {
       console.error('로그인 오류:', err);
       setResult('로그인 실패: ' + (err?.message || '알 수 없는 오류'));
+      Alert.alert('로그인 실패', err?.message || '알 수 없는 오류');
     }
   };
 
@@ -83,9 +85,7 @@ const Login = () => {
       const { accessToken, refreshToken } = responseBody.data;
 
       if (!accessToken || !refreshToken) {
-        throw new Error(
-          'access token / refresh token이 서버 응답에 없음'
-        );
+        throw new Error('access token / refresh token이 서버 응답에 없음');
       }
 
       return { accessToken, refreshToken };
