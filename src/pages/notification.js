@@ -8,47 +8,47 @@ const notificationData = {
   today: [
     {
       id: 1,
-      avatar: "https://cdn.builder.io/api/v1/image/assets/TEMP/a034ac6e0a24ff5d45762e8dbaf2df30cb14c336271177d4ad367065e3a234c8?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b",
+      avatar: "https://via.placeholder.com/40",
       username: "julie 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3시간",
-      postImage: "https://cdn.builder.io/api/v1/image/assets/TEMP/6bdb9721d0dea0e4d45dfe6d0cc82c0e89fc50281f6f0cb9475dda0dc9cb1ee3?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b"
+      postImage: "https://via.placeholder.com/40"
     }
   ],
   yesterday: [
     {
       id: 2,
-      avatar: "https://cdn.builder.io/api/v1/image/assets/TEMP/7a17f4347ce1dcf87bca167f54b8e937b6ee4bcff3e159c0d798ccacf46bfb62?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b",
+      avatar: "https://via.placeholder.com/40",
       username: "julie 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "19시간",
-      postImage: "https://cdn.builder.io/api/v1/image/assets/TEMP/54450de8839cdff4d66fe4ef39c146e6fb7b737ab8a9d165b67e278699ff821e?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b"
+      postImage: "https://via.placeholder.com/40"
     }
   ],
   recentWeek: [
     {
       id: 3,
-      avatar: "https://cdn.builder.io/api/v1/image/assets/TEMP/3b6983fcd3f8445069b7a6f3d4a65adab9c1d0f660502341c62cb2bdb4e48f6a?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b",
+      avatar: "https://via.placeholder.com/40",
       username: "kibbeum 🇰🇷",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "2일",
-      postImage: "https://cdn.builder.io/api/v1/image/assets/TEMP/fd32b2fa08dd8112507cd25f0852ebed743a0e9307aaeebad89b3f5329c928e6?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b"
+      postImage: "https://via.placeholder.com/40",
     },
     {
       id: 4,
-      avatar: "https://cdn.builder.io/api/v1/image/assets/TEMP/b2698c6caf5e0bc0bf16100296bc2aa77d5ea2d7d78370cee62fae41ee357426?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b",
+      avatar: "https://via.placeholder.com/40",
       username: "tommy 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3일",
-      postImage: "https://cdn.builder.io/api/v1/image/assets/TEMP/80824de333c79be9b093c4cb2c1d678cb4153c0a57cffaa972bf3e9f3bd32206?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b"
+      postImage: "https://via.placeholder.com/40",
     },
     {
       id: 5,
-      avatar: "https://cdn.builder.io/api/v1/image/assets/TEMP/31afb2e571c893f66edc3e89f894b353e1be787702c1256538116b832b7ec59a?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b",
+      avatar: "https://via.placeholder.com/40",
       username: "julie0201 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3일",
-      postImage: "https://cdn.builder.io/api/v1/image/assets/TEMP/d1635d46970cfc187072e4a3fde6c7717b94296639dc04c76f5291aecb801394?placeholderIfAbsent=true&apiKey=45195689119146fb9f36ffe6a1d7e50b"
+      postImage: "https://via.placeholder.com/40",
     }
   ]
 };
