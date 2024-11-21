@@ -32,9 +32,9 @@ const Login = () => {
         email: userProfile.email || '',
         nickname: userProfile.nickname || '',
         profileImageUrl: userProfile.profileImageUrl || '',
-        nation: '',
-        school: '',
-        introduction: '',
+        nation: 'unknown',
+        school: 'unknown',
+        introduction: 'unknown',
       };
 
       // AsyncStorage에 사용자 정보 저장

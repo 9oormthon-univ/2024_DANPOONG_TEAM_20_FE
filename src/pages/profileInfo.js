@@ -23,9 +23,9 @@ const ProfileInfo = ({ route, navigation }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          introduction: profileData.introduction || '',
-          nationality: country,
-          school: school,
+          introduction: profileData.introduction,
+          nationality: country || '',
+          school: school || '',
           nickname: profileData.nickname,
         }),
       });
