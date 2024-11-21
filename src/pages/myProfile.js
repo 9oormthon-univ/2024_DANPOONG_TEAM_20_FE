@@ -47,7 +47,12 @@ export default function MyProfile() {
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
       await AsyncStorage.removeItem("userInfo");
-      navigation.replace("Login");
+        const response = await fetch('https://mixmix2.store/api/notifications/disconnect', {
+          method: 'DELETE'
+        });
+        const responseBody = await response.json();
+        console.log('서버 응답:', responseBody);
+        navigation.replace("Login");
     } catch (error) {
       console.error("로그아웃 오류:", error);
     }

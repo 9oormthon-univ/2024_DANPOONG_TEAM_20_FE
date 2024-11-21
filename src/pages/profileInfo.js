@@ -71,7 +71,7 @@ const ProfileInfo = ({ route, navigation }) => {
         onChangeText={setCountry}
       />
       </View>
-      <Pressable ressable onPress={() => navigation.navigate('MainSocial')}>
+      <Pressable onPress={() => navigation.navigate('MainSocial')}>
             <Text>임시</Text>
           </Pressable>
 
