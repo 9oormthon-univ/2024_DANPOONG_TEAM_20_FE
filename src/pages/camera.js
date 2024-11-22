@@ -6,49 +6,48 @@ import {
   Pressable,
   Alert,
   Dimensions,
+  Text,
 } from 'react-native';
 import {Camera, useCameraDevices} from 'react-native-vision-camera';
-import {useNavigation, useIsFocused} from '@react-navigation/native'; // useIsFocused 추가
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 import BackIcon from '../images/back_white.svg';
 import SwitchIcon from '../images/switch.svg';
 import CameraIcon from '../images/camera.svg';
 
-const {width, height} = Dimensions.get('window'); // 화면 크기 가져오기
+const {width, height} = Dimensions.get('window');
 
 const CameraScreen = () => {
   const navigation = useNavigation();
-  const isFocused = useIsFocused(); // 현재 화면 활성화 상태 감지
-  const [isCameraReady, setIsCameraReady] = useState(false);
-  const [cameraPosition, setCameraPosition] = useState('back'); // 카메라 위치
+  const isFocused = useIsFocused();
+  const [cameraPosition, setCameraPosition] = useState('back');
   const cameraRef = useRef(null);
   const devices = useCameraDevices();
   const device = cameraPosition === 'back' ? devices.back : devices.front;
 
   useEffect(() => {
-    const checkPermissions = async () => {
+    const requestPermissions = async () => {
       const cameraPermission = await Camera.getCameraPermissionStatus();
       if (cameraPermission !== 'authorized') {
-        const newCameraPermission = await Camera.requestCameraPermission();
-        if (newCameraPermission !== 'authorized') {
-          Alert.alert('권한 필요', '카메라 사용을 위해 권한이 필요합니다.');
+        const newPermission = await Camera.requestCameraPermission();
+        if (newPermission !== 'authorized') {
+          Alert.alert('권한 필요', '카메라 사용 권한이 필요합니다.');
           navigation.goBack();
         }
       }
     };
-    checkPermissions();
-  }, []);
+    requestPermissions();
+  }, [navigation]);
 
   const takePhoto = async () => {
-    // 더미 데이터
-    const dummyPhoto = {
-      path: 'path/to/dummy/photo.jpg', // 더미 이미지 경로
-    };
+    if (!cameraRef.current) return;
 
     try {
-      console.log('Navigating to PhotoReview with dummy data');
-      navigation.navigate('PhotoReview', {photo: dummyPhoto});
+      const photo = await cameraRef.current.takePhoto({
+        qualityPrioritization: 'balanced', // 사진 품질 설정
+      });
+      navigation.navigate('PhotoReview', {photo}); // PhotoReview로 사진 전달
     } catch (error) {
-      Alert.alert('페이지 이동 실패', error.message);
+      Alert.alert('사진 촬영 실패', error.message);
     }
   };
 
@@ -69,33 +68,30 @@ const CameraScreen = () => {
 
       {/* 카메라 화면 */}
       <View style={styles.cameraWrapper}>
-        {device && (
+        {device ? (
           <Camera
             ref={cameraRef}
             style={styles.camera}
             device={device}
-            isActive={isFocused} // 화면이 포커스 상태일 때만 활성화
+            isActive={isFocused}
             photo={true}
-            onInitialized={() => setIsCameraReady(true)}
-            onError={error => {
-              Alert.alert('에러', error.message);
-              navigation.goBack();
-            }}
           />
+        ) : (
+          <View style={styles.noCamera}>
+            <Text style={styles.noCameraText}>
+              카메라를 사용할 수 없습니다.
+            </Text>
+          </View>
         )}
       </View>
 
       {/* 하단 버튼들 */}
       <View style={styles.buttonContainer}>
-        {/* 촬영 버튼 */}
-        {isCameraReady && (
-          <Pressable onPress={takePhoto} style={styles.captureButton}>
-            <CameraIcon width={70} height={70} />
-          </Pressable>
-        )}
-        {/* 카메라 전환 버튼 */}
         <Pressable onPress={toggleCamera} style={styles.switchButton}>
           <SwitchIcon width={30} height={30} />
+        </Pressable>
+        <Pressable onPress={takePhoto} style={styles.captureButton}>
+          <CameraIcon width={70} height={70} />
         </Pressable>
       </View>
     </SafeAreaView>
@@ -123,24 +119,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   camera: {
-    width: width, // 화면 전체 너비
-    height: width, // 정사각형 비율 유지
+    width: width,
+    height: width,
+  },
+  noCamera: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noCameraText: {
+    color: 'white',
+    fontSize: 16,
   },
   buttonContainer: {
     position: 'absolute',
-    bottom: height * 0.02, // 하단에 비례 위치
-    flexDirection: 'row',
-    justifyContent: 'space-evenly', // 버튼 간격 균등
-    alignItems: 'center',
+    bottom: height * 0.0,
     width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   captureButton: {
-    alignSelf: 'center', // 버튼을 중앙에 배치
-    marginRight: width * 0.1,
+    padding: 10,
+    alignSelf: 'center', // 가운데 정렬
   },
   switchButton: {
     position: 'absolute',
-    marginLeft: width * 0.3,
+    right: width * 0.2, // 오른쪽으로 배치
+    padding: 10,
   },
 });
 

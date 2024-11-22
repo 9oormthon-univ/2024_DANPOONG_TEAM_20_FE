@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
 import {Pressable, View, Image, StyleSheet, Text} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login, getProfile } from '@react-native-seoul/kakao-login';
+import {login, getProfile} from '@react-native-seoul/kakao-login';
 import LogoIconBig from '../images/logo_text_big.svg';
-
 
 const Login = ({navigation}) => {
   const [result, setResult] = useState('');
@@ -74,26 +73,29 @@ const Login = ({navigation}) => {
 
   const signInWithKakao = async () => {
     try {
-      const token = await login();  // 카카오 로그인
-      console.log("로그인 성공, 토큰: ", token);
-      setResult(JSON.stringify(token));  // 결과 출력
-      await AsyncStorage.setItem('kakaoToken', token.accessToken);  // accessToken 저장
-  
+      const token = await login(); // 카카오 로그인
+      console.log('로그인 성공, 토큰: ', token);
+      setResult(JSON.stringify(token)); // 결과 출력
+      await AsyncStorage.setItem('kakaoToken', token.accessToken); // accessToken 저장
+
       // 카카오 사용자 프로필 정보 가져오기
-      const userProfile = await getProfile();  // 카카오 프로필 정보 가져오기
+      const userProfile = await getProfile(); // 카카오 프로필 정보 가져오기
       console.log('사용자 프로필:', userProfile);
-  
+
       // 사용자 정보를 AsyncStorage에 저장
-      await AsyncStorage.setItem("userInfo", JSON.stringify({
-        nickname: userProfile.nickname,
-        profileImageUrl: userProfile.profileImageUrl,
-        email: userProfile.email,
-        nation: "",
-      }));
-  
+      await AsyncStorage.setItem(
+        'userInfo',
+        JSON.stringify({
+          nickname: userProfile.nickname,
+          profileImageUrl: userProfile.profileImageUrl,
+          email: userProfile.email,
+          nation: '',
+        }),
+      );
+
       // idToken을 사용하여 서버에서 accessToken과 refreshToken 받기
       const tokens = await getTokens(token.idToken);
-      
+
       if (tokens) {
         await AsyncStorage.setItem('accessToken', tokens.accessToken);
         await AsyncStorage.setItem('refreshToken', tokens.refreshToken);
@@ -111,7 +113,7 @@ const Login = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <LogoIconBig style={styles.logo}/>
+      <LogoIconBig style={styles.logo} />
       <Pressable style={styles.loginButton} onPress={signInWithKakao}>
         <Image
           source={require('../images/kakao_login.png')}

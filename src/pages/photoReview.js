@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#444', // 임시 배경색
+    backgroundColor: '#000',
   },
   image: {
     width: '90%',
