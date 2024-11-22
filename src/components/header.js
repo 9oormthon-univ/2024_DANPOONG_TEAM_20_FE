@@ -23,7 +23,7 @@ const Header = ({navigation}) => {
       <View style={styles.topBar}>
         {/* 로고 추가 */}
         <LogoIcon width={120} height={24} />
-        <Pressable style={styles.notification}>
+        <Pressable style={styles.notification} onPress={() => navigation.navigate('Notification')}>
           <NotificationIcon width={24} height={24} />
         </Pressable>
       </View>

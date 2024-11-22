@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   View,
@@ -90,7 +90,59 @@ const dummyData = [
   },
 ];
 
-const Rank = ({navigation}) => {
+const Rank = ({ navigation }) => {
+  const [rankData, setRankData] = useState(null);
+  const [loading, setLoading] = useState(true); // 로딩 상태 추가
+
+  // 데이터 가져오는 함수
+  const getRankInfo = async () => {
+    try {
+      const response = await fetch('https://mixmix2.store/api/rankings', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+
+        const rankingData = responseData?.data?.rankingInfoResDto ?? [];
+        setRankData(rankingData); // 상태에 가공된 데이터를 저장
+        console.log('Ranking Data:', rankingData);
+      } else {
+        console.error('데이터 요청 실패:', response.status);
+      }
+    } catch (error) {
+      console.error('프로필 데이터 불러오기 오류:', error);
+    } finally {
+      setLoading(false); // 로딩 상태 해제
+    }
+  };
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    getRankInfo();
+  }, []);
+
+  if (loading) {
+    // 로딩 중일 때 표시
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: height * 0.3 }}>데이터 로딩 중...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!rankData) {
+    // 데이터가 없을 때 표시
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: height * 0.3 }}>데이터를 불러오지 못했습니다.</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Rank 배경 영역 */}
@@ -103,16 +155,16 @@ const Rank = ({navigation}) => {
           <View style={[styles.rankBox, styles.smallRankBox]}>
             <Rank2 style={styles.rankBadge} />
             <Image
-              source={{uri: dummyData[1].image}}
+              source={{uri: rankData[1].profileImage}}
               style={styles.profileImage}
             />
             <View style={styles.nameContainer}>
-              <Text style={styles.nameText}>{dummyData[1].name}</Text>
-              <Text style={styles.flagText}>{dummyData[1].flag}</Text>
+              <Text style={styles.nameText}>{rankData[1].name}</Text>
+              <Text style={styles.flagText}>{rankData[1].nationality}</Text>
             </View>
             <View style={styles.streakContainer}>
               <StreakIcon width={16} height={16} />
-              <Text style={styles.streakText}>{dummyData[1].streak}</Text>
+              <Text style={styles.streakText}>{rankData[1].streak}</Text>
             </View>
           </View>
 
@@ -120,16 +172,16 @@ const Rank = ({navigation}) => {
           <View style={[styles.rankBox, styles.largeRankBox]}>
             <Rank1 style={styles.rankBadge} />
             <Image
-              source={{uri: dummyData[0].image}}
+              source={{uri: rankData[0].profileImage}}
               style={styles.profileImageLarge}
             />
             <View style={styles.nameContainer}>
-              <Text style={styles.nameText}>{dummyData[0].name}</Text>
-              <Text style={styles.flagText}>{dummyData[0].flag}</Text>
+              <Text style={styles.nameText}>{rankData[0].name}</Text>
+              <Text style={styles.flagText}>{rankData[0].nationality}</Text>
             </View>
             <View style={styles.streakContainer}>
               <StreakIcon width={18} height={18} />
-              <Text style={styles.streakText}>{dummyData[0].streak}</Text>
+              <Text style={styles.streakText}>{rankData[0].streak}</Text>
             </View>
           </View>
 
@@ -137,16 +189,16 @@ const Rank = ({navigation}) => {
           <View style={[styles.rankBox, styles.smallRankBox]}>
             <Rank3 style={styles.rankBadge} />
             <Image
-              source={{uri: dummyData[2].image}}
+              source={{uri: rankData[2].profileImage}}
               style={styles.profileImage}
             />
             <View style={styles.nameContainer}>
-              <Text style={styles.nameText}>{dummyData[2].name}</Text>
-              <Text style={styles.flagText}>{dummyData[2].flag}</Text>
+              <Text style={styles.nameText}>{rankData[2].name}</Text>
+              <Text style={styles.flagText}>{rankData[2].nationality}</Text>
             </View>
             <View style={styles.streakContainer}>
               <StreakIcon width={16} height={16} />
-              <Text style={styles.streakText}>{dummyData[2].streak}</Text>
+              <Text style={styles.streakText}>{rankData[2].streak}</Text>
             </View>
           </View>
         </View>
@@ -154,21 +206,21 @@ const Rank = ({navigation}) => {
 
       {/* 스크롤 가능한 나머지 랭킹 */}
       <ScrollView style={styles.scrollContainer}>
-        {dummyData.slice(3).map((user, index) => (
-          <View key={user.id} style={styles.row}>
-            <Text style={styles.rank}>{user.id}</Text>
-            <Image source={{uri: user.image}} style={styles.profileImageRow} />
-            <View>
-              <View style={styles.nameContainer}>
-                <Text style={styles.nameText}>{user.name}</Text>
-                <Text style={styles.flagText}>{user.flag}</Text>
-              </View>
-              <View style={styles.streakContainer}>
-                <StreakIcon width={16} height={16} />
-                <Text style={styles.streakText}>{user.streak}</Text>
-              </View>
+      {rankData.slice(3).map((user, index) => (
+        <View key={user.id} style={styles.row}>
+          <Text style={styles.rank}>{(index + 4).toString()}</Text>
+          <Image source={{uri: user.profileImage}} style={styles.profileImageRow} />
+          <View>
+            <View style={styles.nameContainer}>
+              <Text style={styles.nameText}>{user.name}</Text>
+              <Text style={styles.flagText}>{user.nationality}</Text>
+            </View>
+            <View style={styles.streakContainer}>
+              <StreakIcon width={16} height={16} />
+              <Text style={styles.streakText}>{user.streak}</Text>
             </View>
           </View>
+        </View>
         ))}
       </ScrollView>
 

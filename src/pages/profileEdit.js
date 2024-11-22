@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, ScrollView, View, Pressable, Text, TextInput, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Svg, { Defs, ClipPath, Path, Image as SvgImage } from "react-native-svg";
+import Svg, { Defs, ClipPath, Path, Image as SvgImage, Circle } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import Header3 from "../components/header3";
 import MyProfile from "./myProfile";
@@ -18,7 +18,7 @@ export default function ProfileEdit() {
 
     // 입력 필드별 상태
     const [nickname, setNickname] = useState("");
-    const [university, setUniversity] = useState("");
+    const [school, setSchool] = useState("");
     const [introduction, setIntroduction] = useState("");
   
     // 사용자 정보 불러오기
@@ -30,9 +30,9 @@ export default function ProfileEdit() {
           setUserInfo(parsedUserInfo);
   
           // 초기값 설정
-          setNickname(parsedUserInfo.nickname || "");
-          setUniversity(parsedUserInfo.university || "");
-          setIntroduction(parsedUserInfo.introduction || "");
+          setNickname(parsedUserInfo.nickname);
+          setSchool(parsedUserInfo.school);
+          setIntroduction(parsedUserInfo.introduction);
         }
       } catch (error) {
         console.error("사용자 정보 가져오기 오류:", error);
@@ -47,16 +47,16 @@ export default function ProfileEdit() {
         // 기존 userInfo와 병합하여 업데이트
         const updatedUserInfo = {
           ...userInfo,
-          nickname: nickname || userInfo?.nickname || "",
-          university: university || userInfo?.university || "",
-          introduction: introduction || userInfo?.introduction || "",
+          nickname: nickname || userInfo?.nickname,
+          school: school || userInfo?.school,
+          introduction: introduction || userInfo?.introduction,
         };
   
         // AsyncStorage에 저장
         await AsyncStorage.setItem("userInfo", JSON.stringify(updatedUserInfo));
         setUserInfo(updatedUserInfo);
   
-        alert("수정이 완료되었습니다!");
+        // alert("수정이 완료되었습니다!");
         navigation.navigate("MyProfile");
         handleProfileEdit();
 
@@ -89,20 +89,22 @@ export default function ProfileEdit() {
         <View style={styles.profileSection}>
           {/* 프로필 이미지 */}
           <View style={styles.profileImageContainer}>
-            <Svg width={155} height={150}>
+            <Svg width={144} height={144}>
               <Defs>
-                <ClipPath id="mixmix">
-                  <Path d="M77.5 23.3165C17.5702 -29.9316 -30.9666 17.0581 24.073 75C-30.9666 132.994 17.5702 179.984 77.5 126.684C137.43 179.932 185.967 132.942 130.927 75C185.967 17.006 137.43 -29.9838 77.5 23.3165Z" />
+              <ClipPath id="mixmix">
+                <Circle cx="72" cy="72" r="72" />
                 </ClipPath>
               </Defs>
               <SvgImage
-                href={userInfo?.profileImageUrl || "https://via.placeholder.com/120"}
+                href={
+                  userInfo?.picture || 'https://via.placeholder.com/120'
+                }
                 width="100%"
                 height="100%"
                 clipPath="url(#mixmix)"
                 preserveAspectRatio="xMidYMid slice"
               />
-            </Svg>
+              </Svg>
           </View>
           </View>
           {/* 닉네임 */}
@@ -122,8 +124,8 @@ export default function ProfileEdit() {
             <Text style={styles.editField}>학교명</Text>
             <TextInput
               style={styles.input}
-              value={university}
-              onChangeText={setUniversity}
+              value={school}
+              onChangeText={setSchool}
               placeholder="학교명을 입력하세요"
               placeholderTextColor="#d9d9d9"
             />

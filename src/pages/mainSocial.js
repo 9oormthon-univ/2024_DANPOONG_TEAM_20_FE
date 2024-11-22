@@ -124,12 +124,15 @@ const MainSocial = ({navigation, route}) => {
           <View style={styles.postContainer}>
             <View style={styles.profileContainer}>
               <View style={styles.profileInfo}>
+                {/*여기서 이거 누르면 otherinfo로 넘어가게 해줘야함 */}
+                <Pressable>
                 <Image
                   source={{
                     uri: item.profileImage || 'https://via.placeholder.com/40',
                   }}
                   style={styles.profileImage}
                 />
+                </Pressable>
                 <View style={styles.profileText}>
                   <Text style={styles.name}>
                     {item.name || '익명'}{' '}
