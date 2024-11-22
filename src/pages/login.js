@@ -35,9 +35,9 @@ const Login = () => {
         email: userProfile.email || '',
         nickname: userProfile.nickname || '',
         profileImageUrl: userProfile.profileImageUrl || '',
-        nation: 'unknown',
-        school: 'unknown',
-        introduction: 'unknown',
+        nation: 'kr',
+        school: '구름대학교',
+        introduction: '저희 동네친구 할래요?',
       };
       await AsyncStorage.setItem('userInfo', JSON.stringify(profileData));
 

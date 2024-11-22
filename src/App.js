@@ -11,7 +11,8 @@ import PhotoReview from './pages/photoReview';
 import Rank from './pages/rank';
 import Login from './pages/login';
 import Feed from './pages/feed';
-import Upload from './pages/upload'; // 추가된 Upload
+import Upload from './pages/upload';
+import Quiz from './pages/quiz';
 import ProfileInfo from './pages/profileInfo';
 import Notification from './pages/notification';
 
@@ -38,15 +39,15 @@ const App = () => {
           component={MainSocial}
           options={{headerShown: false}}
         />
-        <Stack.Screen 
-        name="ProfileInfo" 
-        component={ProfileInfo} 
-        options={{headerShown: false}}
-        />
         <Stack.Screen
-        name="Notification"
-        component={Notification}
-        options={{headerShown: false}}
+          name="Notification"
+          component={Notification}
+          options={{headerShown: false}}
+        />        
+        <Stack.Screen
+          name="ProfileInfo"
+          component={ProfileInfo}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="Feed"
