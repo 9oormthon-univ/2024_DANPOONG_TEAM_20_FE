@@ -22,18 +22,19 @@ const Quiz = ({navigation}) => {
       const response = await fetch('https://mixmix2.store/api/quiz', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // JSON 형식으로 요청
+          'Content-Type': 'application/json', 
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({}), // 빈 객체를 JSON 형식으로 보냄
+        body: JSON.stringify({}), 
       });
 
       if (!response.ok) {
         throw new Error('퀴즈를 가져오는 데 실패했습니다.');
       }
 
-      const data = await response.json(); // JSON 형태로 응답 받기
+      const data = await response.json(); 
       setQuiz(data); // 퀴즈 데이터 상태에 저장
+      console.log(quiz);
     } catch (error) {
       console.error('퀴즈를 가져오는 데 오류가 발생했습니다:', error);
     }
@@ -59,7 +60,7 @@ const Quiz = ({navigation}) => {
   // 정답 제출 처리
   const handleSubmit = () => {
     if (selectedOption) {
-      const isCorrectAnswer = selectedOption.text === currentQuiz.answer;
+      const isCorrectAnswer = selectedOption.id === quiz.answer;
       setIsCorrect(isCorrectAnswer);
       setShowModal(true); // 모달 표시
     } else {
