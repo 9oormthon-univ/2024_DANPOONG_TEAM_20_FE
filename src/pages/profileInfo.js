@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LogoIconBig from '../images/logo_text_big.svg';
+import CountryFlag from 'react-native-country-flag'; // 추가
 
 const ProfileInfo = ({ route, navigation }) => {
   const { profileData } = route.params; // 카카오 프로필 데이터
@@ -30,10 +31,9 @@ const ProfileInfo = ({ route, navigation }) => {
         }),
       });
   
-      // 상태 코드가 200이 아닌 경우
       if (!response.ok) {
         const errorBody = await response.json();
-        console.error('서버 오류:', errorBody);  // 서버의 오류 내용을 확인
+        console.error('서버 오류:', errorBody);
         throw new Error(`서버에 저장 실패: ${errorBody.message || '알 수 없는 오류'}`);
       }
   
@@ -47,100 +47,108 @@ const ProfileInfo = ({ route, navigation }) => {
       Alert.alert('오류', error.message || '저장 중 오류');
     }
   };
-  
 
   return (
     <View style={styles.container}>
-        <LogoIconBig style={styles.logo}/>
-        <View style={styles.inputContainer}>
-            <Text style={styles.label}>학교명</Text>
-            <TextInput 
-            style={styles.input}
-            placeholder="새로운 친구와 소통해봐요..."
-            value={school}
-            onChangeText={setSchool}
-      />
+      <LogoIconBig style={styles.logo} />
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>학교명</Text>
+        <TextInput 
+          style={styles.input}
+          placeholder="새로운 친구와 소통해봐요..."
+          value={school}
+          onChangeText={setSchool}
+        />
       </View>
 
       <View style={styles.inputContainer}>
-      <Text style={styles.label}>국가명</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="새로운 친구와 소통해봐요..."
-        value={country}
-        onChangeText={setCountry}
-      />
+        <Text style={styles.label}>국가명</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="국가 코드를 입력하세요 (예: KR, US)"
+          value={country}
+          onChangeText={setCountry}
+        />
+        {/* 국가 코드에 따른 국기 표시 */}
+        {country && (
+          <View style={styles.flagContainer}>
+            <CountryFlag isoCode={country.toUpperCase()} size={32} />
+            <Text style={styles.flagText}>{country.toUpperCase()}</Text>
+          </View>
+        )}
       </View>
-      <Pressable onPress={() => navigation.navigate('MainSocial')}>
-            <Text>임시</Text>
-          </Pressable>
 
-          {/* 수정 완료 버튼 */}
-          <Pressable style={styles.editFin} onPress={handleSave}>
-            <View style={styles.editFin2}>
-            <Text style={styles.editFinText}>수정완료</Text>
-            </View>
-          </Pressable>
+      <Pressable onPress={() => navigation.navigate('MainSocial')}>
+        <Text>임시</Text>
+      </Pressable>
+
+      <Pressable style={styles.editFin} onPress={handleSave}>
+        <View style={styles.editFin2}>
+          <Text style={styles.editFinText}>수정완료</Text>
+        </View>
+      </Pressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-    logo: {
-        // alignItems: 'center',
-        // justifyContent: "center",
-        marginTop: 10,
-        marginBottom: 60,
-        transform: [{ scale: 0.8 }],
-    },
-    inputContainer: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-    },
+  logo: {
+    marginTop: 10,
+    marginBottom: 60,
+    transform: [{ scale: 0.8 }],
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  flagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  flagText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
   container: {
     flex: 1,
     padding: 20,
-    alignItems: "center",
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   label: {
-    textAlign: "left",
-    marginBottom: 4,
-    marginRight: 24,
     fontSize: 14,
     marginVertical: 10,
-    fontFamily: "Pretendard-SemiBold",
-    color: "#000",
+    marginRight: 8,
+    fontFamily: 'Pretendard-SemiBold',
+    color: '#000',
   },
   input: {
+    flex: 1,
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 20,
     paddingHorizontal: 10,
     borderRadius: 10,
-    width: 283,
   },
   editFin: {
     width: 361,
     height: 52,
-    backgroundColor: "#ff6152",
+    backgroundColor: '#ff6152',
     borderRadius: 12,
-    paddingHorizontal: 70,
-    paddingVertical: 16,
-    marginTop: "40%",
-    marginHorizontal: 8,
-},
-editFin2: {
-    position: "absolute",
+    marginTop: '40%',
+  },
+  editFin2: {
+    position: 'absolute',
     left: 155,
     top: 15,
-},
-editFinText: {
-    fontFamily: "Pretendard-SemiBold",
-    color: "#ffffff",
+  },
+  editFinText: {
+    fontFamily: 'Pretendard-SemiBold',
+    color: '#ffffff',
     fontSize: 16,
-},
+  },
 });
 
 export default ProfileInfo;

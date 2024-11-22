@@ -7,11 +7,12 @@ import MainEdu from './pages/mainEdu';
 import MyProfile from './pages/myProfile';
 import Dm from './pages/dm';
 import Camera from './pages/camera';
-import PhotoReview from './pages/photoReview'; // 추가된 PhotoReview
+import PhotoReview from './pages/photoReview';
 import Rank from './pages/rank';
 import Login from './pages/login';
 import Feed from './pages/feed';
-import Upload from './pages/upload'; // 추가된 Upload
+import Upload from './pages/upload';
+import Quiz from './pages/quiz';
 import ProfileInfo from './pages/profileInfo';
 import Notification from './pages/notification';
 
@@ -38,15 +39,15 @@ const App = () => {
           component={MainSocial}
           options={{headerShown: false}}
         />
-        <Stack.Screen 
-        name="ProfileInfo" 
-        component={ProfileInfo} 
-        options={{headerShown: false}}
-        />
         <Stack.Screen
-        name="Notification"
-        component={Notification}
-        options={{headerShown: false}}
+          name="Notification"
+          component={Notification}
+          options={{headerShown: false}}
+        />        
+        <Stack.Screen
+          name="ProfileInfo"
+          component={ProfileInfo}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="Feed"
@@ -79,19 +80,24 @@ const App = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="PhotoReview" // 새로 추가된 스크린
+          name="PhotoReview"
           component={PhotoReview}
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="Upload" // 새로 추가된 스크린
+          name="Upload"
           component={Upload}
           options={{headerShown: false}}
         />
         <Stack.Screen
           name="Rank"
           component={Rank}
-          options={{title: 'Ranking'}}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Quiz"
+          component={Quiz}
+          options={{headerShown: false}}
         />
       </Stack.Navigator>
     </NavigationContainer>
