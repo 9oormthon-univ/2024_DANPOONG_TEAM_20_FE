@@ -1,13 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  Dimensions,
-} from 'react-native';
+import {StyleSheet, ScrollView, View, Text, Pressable, ActivityIndicator, Dimensions} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, {Defs, ClipPath, Path, Circle, Image as SvgImage} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
@@ -31,50 +23,45 @@ export default function MyProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null); // 서버에서 가져온 데이터를 저장
 
-  // 서버에서 데이터 가져오기
-  const profileDetail = async () => {
-    try {
-      const accessToken = await AsyncStorage.getItem("accessToken");
-      const response = await fetch("https://mixmix2.store/api/member/mypage", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+// 서버에서 데이터 가져오기
+const profileDetail = async () => {
+  try {
+    const accessToken = await AsyncStorage.getItem("accessToken");
+    const response = await fetch("https://mixmix2.store/api/member/mypage", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data); // 가져온 데이터를 상태에 저장
-        console.log("userdata:", data);
-      } else {
-        console.error("데이터 요청 실패", response.status);
-      }
-    } catch (error) {
-      console.error("프로필 데이터 불러오기 오류:", error);
-    } finally {
-      setLoading(false); 
+    if (response.ok) {
+      const data = await response.json();
+      setUserData(data); // 가져온 데이터를 상태에 저장
+      console.log("userdata:", data);
+      setUserInfo(data.data); // userInfo에 실제 프로필 데이터 저장
+    } else {
+      console.error("데이터 요청 실패", response.status);
     }
-  };
+  } catch (error) {
+    console.error("프로필 데이터 불러오기 오류:", error);
+  } finally {
+    setLoading(false); 
+  }
+};
 
   useEffect(() => {
     profileDetail();
-  }, []);
-
-  useEffect(() => {
-    loadUserInfo();
-  }, []);
-  const handleProfileEdit = () => {
-    setIsEditing(true); // 프로필 편집 화면으로 전환
-  };
+    loadUserInfo(); // 데이터 가져오기 두 가지 함수를 동시에 실행
+  }, []); // 컴포넌트가 처음 렌더링될 때만 실행
 
   // 사용자 정보 불러오기
   const loadUserInfo = async () => {
     try {
       const storedUserInfo = await AsyncStorage.getItem('userInfo');
-      console.log("userinfo:", userInfo);
+      console.log("userinfo:", storedUserInfo);
       if (storedUserInfo) {
-        setUserInfo(JSON.parse(storedUserInfo));
+        setUserInfo(JSON.parse(storedUserInfo)); // userInfo 상태 업데이트
       }
     } catch (error) {
       console.error('사용자 정보 가져오기 오류:', error);
@@ -83,18 +70,26 @@ export default function MyProfile() {
     }
   };
 
+  useEffect(() => {
+    console.log("userInfo updated:", userInfo); // userInfo가 변경될 때마다 출력
+  }, [userInfo]); // userInfo가 변경될 때마다 실행
+
+  const handleProfileEdit = () => {
+    setIsEditing(true); // 프로필 편집 화면으로 전환
+  };
+
   // 로그아웃 핸들러
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
       await AsyncStorage.removeItem("userInfo");
-        const response = await fetch('https://mixmix2.store/api/notifications/disconnect', {
-          method: 'DELETE'
-        });
-        const responseBody = await response.json();
-        console.log('서버 응답:', responseBody);
-        navigation.replace("Login");
+      const response = await fetch('https://mixmix2.store/api/notifications/disconnect', {
+        method: 'DELETE'
+      });
+      const responseBody = await response.json();
+      console.log('서버 응답:', responseBody);
+      navigation.replace("Login");
     } catch (error) {
       console.error('로그아웃 오류:', error);
     }
@@ -110,6 +105,11 @@ export default function MyProfile() {
         <ActivityIndicator size="large" color="#ff6152" />
       </View>
     );
+  }
+
+  // 사용자 정보가 없거나 서버 데이터가 아직 로드되지 않으면 반환하지 않음
+  if (!userInfo || !userData) {
+    return null; // 데이터를 기다리면서 로딩 화면만 표시
   }
 
   return (
@@ -153,10 +153,10 @@ export default function MyProfile() {
 
           <View style={styles.profileNameContainer}>
             <Text style={styles.profileName}>
-              {userInfo?.nickname || '사용자'}
+              {userInfo?.name || '사용자'}
             </Text>
             <Text style={styles.profileNation}>
-              · {userInfo?.nation || '국가 🇰🇷'}
+              · {userInfo?.nationality || '국가 🇰🇷'}
             </Text>
           </View>
           <Text style={styles.message}>{userInfo.introduction}</Text>
@@ -166,7 +166,7 @@ export default function MyProfile() {
         <View style={styles.postsSection}>
           <View style={styles.postCategory}>
             <Text style={[styles.postLabel, {color: '#ff6152'}]}>Social</Text>
-            <Text style={styles.postCount}>{userInfo.SocialCount}</Text>
+            <Text style={styles.postCount}>{userInfo.socialCount}</Text>
           </View>
           <LineProfile />
           <View style={styles.postCategory}>

@@ -1,18 +1,11 @@
-import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  Dimensions,
-  Modal,
-} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Dimensions, Modal} from 'react-native';
 
 import BackIcon from '../images/back.svg';
 import QuizDateIcon from '../images/quiz_date.svg';
 import CorrectModal from '../components/CorrectModal';
 import IncorrectModal from '../components/IncorrectModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {width} = Dimensions.get('window');
 
@@ -20,6 +13,34 @@ const Quiz = ({navigation}) => {
   const [selectedOption, setSelectedOption] = useState(null); // 선택된 답변 상태
   const [isCorrect, setIsCorrect] = useState(null); // 정답 여부
   const [showModal, setShowModal] = useState(false); // 모달 표시 상태
+  const [quiz, setQuiz] = useState(null);
+
+  // 퀴즈 데이터 생성 요청 함수 (POST)
+  const fetchQuiz = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const response = await fetch('https://mixmix2.store/api/quiz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // JSON 형식으로 요청
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({}), // 빈 객체를 JSON 형식으로 보냄
+      });
+
+      if (!response.ok) {
+        throw new Error('퀴즈를 가져오는 데 실패했습니다.');
+      }
+
+      const data = await response.json(); // JSON 형태로 응답 받기
+      setQuiz(data); // 퀴즈 데이터 상태에 저장
+    } catch (error) {
+      console.error('퀴즈를 가져오는 데 오류가 발생했습니다:', error);
+    }
+  };
+  useEffect(() => {
+    fetchQuiz();
+  }, []);
 
   // 더미 퀴즈 데이터
   const currentQuiz = {
