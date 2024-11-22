@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   View,
@@ -11,15 +11,36 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import BackIcon from '../images/back.svg'; // 뒤로가기 아이콘 추가
+import AsyncStorage from '@react-native-async-storage/async-storage'; // 사용자 이메일 가져오기
+import BackIcon from '../images/back.svg';
 
 const {width, height} = Dimensions.get('window'); // 화면 너비와 높이 가져오기
 
 const Upload = ({route, navigation}) => {
   const [postText, setPostText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Social'); // 디폴트값 Social로 변경
+  const [selectedCategory, setSelectedCategory] = useState('Social'); // 기본 카테고리 설정
   const [selectedTags, setSelectedTags] = useState([]);
+  const [userEmail, setUserEmail] = useState(''); // 사용자 이메일 저장 상태
   const {photo} = route.params; // PhotoReview에서 전달된 사진
+
+  // 초기 이메일 가져오기
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      try {
+        const userInfo = await AsyncStorage.getItem('userInfo');
+        if (userInfo) {
+          const parsedInfo = JSON.parse(userInfo);
+          setUserEmail(parsedInfo.email || ''); // 이메일 설정
+        } else {
+          Alert.alert('오류', '사용자 이메일을 확인할 수 없습니다.');
+        }
+      } catch (error) {
+        console.error('이메일 가져오기 실패:', error);
+      }
+    };
+
+    fetchUserEmail();
+  }, []);
 
   const hashtagsByCategory = {
     Social: ['#음식', '#K-POP', '#핫플', '#질문', '#구인'],
@@ -38,24 +59,62 @@ const Upload = ({route, navigation}) => {
 
   const handleCategoryChange = category => {
     setSelectedCategory(category);
-    setSelectedTags([]); // 카테고리가 변경되면 선택된 해시태그 초기화
+    setSelectedTags([]); // 카테고리 변경 시 해시태그 초기화
   };
 
-  const handleShare = () => {
-    const postData = {
-      text: postText,
-      category: selectedCategory,
-      tags: selectedTags,
-      photo: photo?.path,
-    };
+  const handleShare = async () => {
+    if (!userEmail) {
+      Alert.alert('오류', '사용자 이메일을 확인할 수 없습니다.');
+      return;
+    }
 
-    // Social과 Edu에 따라 다른 화면으로 이동
-    if (selectedCategory === 'Social') {
-      navigation.navigate('MainSocial', {postData});
-    } else if (selectedCategory === 'Edu') {
-      navigation.navigate('MainEdu', {postData});
-    } else {
-      Alert.alert('알림', '올바른 카테고리를 선택하세요.');
+    const formData = new FormData();
+    formData.append(
+      'feedSaveReqDto',
+      JSON.stringify({
+        contents: postText,
+        hashTags: selectedTags.join(', '),
+        feedType: selectedCategory.toUpperCase(),
+      }),
+    );
+
+    // 파일 확장자 동적 처리
+    const fileType = photo.path.split('.').pop(); // 파일 확장자 추출
+    formData.append('feedImage', {
+      uri: photo.path.startsWith('file://') ? photo.path : `file://${photo.path}`,
+      name: `photo.${fileType}`,
+      type: `image/${fileType}`,
+    });
+    
+
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      console.log("Photo Path:", photo.path);
+      const response = await fetch('https://mixmix2.store/api/feed', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const responseData = await response.json(); // 서버 응답 데이터 가져오기
+        Alert.alert('성공', '피드가 성공적으로 업로드되었습니다.');
+        navigation.navigate(
+          selectedCategory === 'Social' ? 'MainSocial' : 'MainEdu',
+          {
+            newPost: responseData.data, // 업로드한 게시글 데이터 전달
+          },
+        );
+      } else {
+        const errorData = await response.json();
+        console.error('API 오류:', errorData);
+        Alert.alert('오류', '피드 업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('업로드 오류:', error);
+      Alert.alert('오류', '네트워크 문제로 업로드에 실패했습니다.');
     }
   };
 
@@ -118,19 +177,13 @@ const Upload = ({route, navigation}) => {
               key={tag}
               style={[
                 styles.hashtagButton,
-                selectedTags.includes(tag) &&
-                  (tag === '#질문' || tag === '#구인'
-                    ? styles.specialSelectedHashtagButton
-                    : styles.selectedHashtagButton),
+                selectedTags.includes(tag) && styles.selectedHashtagButton,
               ]}
               onPress={() => toggleTag(tag)}>
               <Text
                 style={[
                   styles.hashtagText,
-                  selectedTags.includes(tag) &&
-                    (tag === '#질문' || tag === '#구인'
-                      ? styles.specialSelectedHashtagText
-                      : styles.selectedHashtagText),
+                  selectedTags.includes(tag) && styles.selectedHashtagText,
                 ]}>
                 {tag}
               </Text>
@@ -147,7 +200,6 @@ const Upload = ({route, navigation}) => {
 };
 
 const styles = StyleSheet.create({
-  // 기존 스타일 유지
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -237,18 +289,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF6152',
     borderColor: '#FF6152',
   },
-  specialSelectedHashtagButton: {
-    backgroundColor: '#767676',
-    borderColor: 'transparent',
-  },
   hashtagText: {
     fontSize: width * 0.04,
     color: '#333',
   },
   selectedHashtagText: {
-    color: '#fff',
-  },
-  specialSelectedHashtagText: {
     color: '#fff',
   },
   shareButton: {

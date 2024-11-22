@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   View,
@@ -8,94 +8,205 @@ import {
   TextInput,
   Pressable,
   Image,
+  Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header2 from '../components/header2';
 import SendCommentIcon from '../images/sendComment.svg';
 import SendDmIcon from '../images/sendDm.svg';
-import OptionIcon from '../images/option.svg'; // Option 아이콘 추가
+import OptionIcon from '../images/option.svg';
 
-const Feed = () => {
-  const feedData = {
-    id: 'feed',
-    type: 'feed',
-    profileImage: 'https://via.placeholder.com/40',
-    name: 'nanami',
-    flag: '🇯🇵',
-    time: '2시간 전',
-    contentImage: 'https://via.placeholder.com/300',
-    text: '어제 새로 산 카메라로 함께 사진 찍으며 놀아요',
+const Feed = ({route}) => {
+  const {feedId} = route.params; // MainSocial에서 전달받은 feedId
+  const [feedData, setFeedData] = useState(null); // 피드 데이터
+  const [comments, setComments] = useState([]); // 댓글 리스트
+  const [commentText, setCommentText] = useState(''); // 댓글 입력 값
+  // feedId를 AsyncStorage에 저장
+  useEffect(() => {
+    const saveFeedIdToStorage = async () => {
+      try {
+        await AsyncStorage.setItem('feedId', feedId.toString());
+      } catch (error) {
+        console.error('feedId 저장 오류:', error);
+        Alert.alert('오류', 'feedId를 저장하는 데 실패했습니다.');
+      }
+    };
+    saveFeedIdToStorage();
+  }, [feedId]);
+
+  useEffect(() => {
+    const fetchFeedDetails = async () => {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+
+      if (!accessToken) {
+        Alert.alert('오류', '토큰이 없습니다.');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://mixmix2.store/api/feed/${feedId}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setFeedData(data.data); // 피드 데이터 설정
+          setComments(data.data.comments || []); // 댓글 데이터 설정
+        } else {
+          const errorData = await response.json();
+          Alert.alert(
+            '오류',
+            errorData.message || '피드 정보를 가져오는 데 실패했습니다.',
+          );
+        }
+      } catch (error) {
+        Alert.alert('오류', '네트워크 오류가 발생했습니다.');
+      }
+    };
+
+    fetchFeedDetails();
+  }, [feedId]);
+
+  const handleSendComment = async () => {
+    if (!commentText.trim()) {
+      Alert.alert('오류', '댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    const accessToken = await AsyncStorage.getItem('accessToken');
+
+    if (!accessToken) {
+      Alert.alert('오류', '토큰이 없습니다.');
+      return;
+    }
+
+    try {
+      console.log(feedId);
+      // feedId를 AsyncStorage에서 가져오기
+      const savedFeedId = await AsyncStorage.getItem('feedId');
+      if (!savedFeedId) {
+        Alert.alert('오류', 'feedId가 없습니다.');
+        return;
+      }
+
+      console.log('댓글 작성 API 호출: https://mixmix2.store/api/comments');
+      console.log('전송 데이터:', {
+        commentsSaveReqDto: {
+          contents: commentText,
+          feedId: savedFeedId,
+        },
+      });
+      const response = await fetch('https://mixmix2.store/api/comments', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          commentsSaveReqDto: {
+            contents: commentText,
+            feedId: savedFeedId, // feedId를 숫자로 변환하여 전송
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+
+        // 서버로부터 받은 새로운 댓글 데이터
+        const newComment = {
+          commentWriterId: result.data.commentWriterId,
+          nickname: result.data.nickname,
+          picture: result.data.picture,
+          contents: result.data.contents,
+          createdAt: result.data.createdAt,
+          nationality: result.data.nationality,
+        };
+
+        // 기존 댓글 리스트에 새 댓글 추가
+        setComments(prevComments => [newComment, ...prevComments]);
+        setCommentText(''); // 댓글 입력창 초기화
+      } else {
+        const errorData = await response.json();
+        Alert.alert('오류', errorData.message || '댓글 작성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('댓글 작성 오류:', error);
+      Alert.alert('오류', '네트워크 오류가 발생했습니다.');
+    }
   };
 
-  const comments = [
-    {
-      id: '1',
-      type: 'comment',
-      profileImage: 'https://via.placeholder.com/40',
-      name: 'karina',
-      flag: '🇰🇷',
-      time: '2시간 전',
-      text: '저 함께 하고 싶어요',
-    },
-  ];
-
   // 피드 콘텐츠와 댓글을 합친 데이터
-  const data = [feedData, ...comments];
+  const data = feedData ? [feedData, ...comments] : [];
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 상단 헤더 */}
       <Header2 />
 
-      {/* 피드 콘텐츠와 댓글 리스트 */}
       <FlatList
         data={data}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{paddingBottom: 80}} // 댓글 입력창 여백 추가
+        keyExtractor={item => item.feedId?.toString() || item.id?.toString()}
+        contentContainerStyle={{paddingBottom: 80}}
         renderItem={({item}) => {
-          if (item.type === 'feed') {
-            // 피드 콘텐츠 렌더링
+          if (item.feedId) {
             return (
               <View style={styles.feedContainer}>
                 <View style={styles.profileContainer}>
-                  {/* 프로필 정보 */}
                   <View style={styles.profileInfo}>
                     <Image
-                      source={{uri: item.profileImage}}
+                      source={{
+                        uri:
+                          item.profileImage || 'https://via.placeholder.com/40',
+                      }}
                       style={styles.profileImage}
                     />
                     <View>
                       <Text style={styles.name}>
-                        {item.name} <Text style={styles.flag}>{item.flag}</Text>
+                        {item.name || '익명'}{' '}
+                        <Text style={styles.flag}>{item.flag || ''}</Text>
                       </Text>
-                      <Text style={styles.time}>{item.time}</Text>
+                      <Text style={styles.time}>
+                        {new Date(item.createdAt).toLocaleString() || '방금 전'}
+                      </Text>
                     </View>
                   </View>
-                  {/* Option 아이콘 */}
                   <Pressable style={styles.optionButton}>
                     <OptionIcon width={18} height={18} />
                   </Pressable>
                 </View>
                 <Image
-                  source={{uri: item.contentImage}}
+                  source={{
+                    uri: item.feedImage || 'https://via.placeholder.com/300',
+                  }}
                   style={styles.contentImage}
                 />
-                <Text style={styles.feedText}>{item.text}</Text>
+                <Text style={styles.feedText}>{item.contents}</Text>
               </View>
             );
-          } else if (item.type === 'comment') {
-            // 댓글 렌더링
+          } else {
             return (
               <View style={styles.commentContainer}>
                 <Image
-                  source={{uri: item.profileImage}}
+                  source={{
+                    uri: item.profileImage || 'https://via.placeholder.com/40',
+                  }}
                   style={styles.commentProfileImage}
                 />
                 <View style={styles.commentContent}>
                   <Text style={styles.commentName}>
-                    {item.name} <Text style={styles.flag}>{item.flag}</Text>
+                    {item.name || '익명'}{' '}
+                    <Text style={styles.flag}>{item.flag || ''}</Text>
                   </Text>
-                  <Text style={styles.commentText}>{item.text}</Text>
-                  <Text style={styles.commentTime}>{item.time}</Text>
+                  <Text style={styles.commentText}>{item.contents}</Text>
+                  <Text style={styles.commentTime}>
+                    {new Date(item.createdAt).toLocaleString() || '방금 전'}
+                  </Text>
                 </View>
                 <Pressable style={styles.sendDmButton}>
                   <SendDmIcon width={18} height={18} />
@@ -106,14 +217,17 @@ const Feed = () => {
         }}
       />
 
-      {/* 댓글 입력창 */}
       <View style={styles.commentInputContainer}>
         <TextInput
           style={styles.commentInputWithButton}
+          value={commentText}
+          onChangeText={setCommentText}
           placeholder="새로운 친구와 소통해보세요..."
           placeholderTextColor="#999"
         />
-        <Pressable style={styles.sendCommentInsideButton}>
+        <Pressable
+          style={styles.sendCommentInsideButton}
+          onPress={handleSendComment}>
           <SendCommentIcon width={50} height={30} />
         </Pressable>
       </View>
@@ -133,7 +247,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Option 아이콘을 오른쪽으로 정렬
+    justifyContent: 'space-between',
     marginBottom: 8,
   },
   profileInfo: {

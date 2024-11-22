@@ -20,7 +20,7 @@ const tabs = [
     icon: HomeIcon,
     activeIcon: HomeIconActive,
   },
-  {name: 'Dm', routes: ['Dm'], icon: DmIcon},
+  {name: 'DmList', routes: ['DmList'], icon: DmIcon},
   {name: 'Camera', routes: ['Camera'], icon: CameraIcon},
   {name: 'Rank', routes: ['Rank'], icon: RankIcon, activeIcon: RankIconActive},
   {

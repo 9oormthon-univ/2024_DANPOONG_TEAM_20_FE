@@ -6,9 +6,10 @@ import {
   Text,
   Pressable,
   ActivityIndicator,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Svg, {Defs, ClipPath, Path, Image as SvgImage} from 'react-native-svg';
+import Svg, {Defs, ClipPath, Path, Circle, Image as SvgImage} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
 import StreakIcon from '../images/Fire_fill.svg';
 import BadgeIcon from '../images/badge1.svg';
@@ -21,11 +22,44 @@ import LineUnderCal from '../images/lineUnderCal.svg';
 import NavBar from '../components/navBar';
 import ProfileEdit from './profileEdit';
 
+const {width, height} = Dimensions.get('window');
+
 export default function MyProfile() {
   const navigation = useNavigation();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData] = useState(null); // 서버에서 가져온 데이터를 저장
+
+  // 서버에서 데이터 가져오기
+  const profileDetail = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const response = await fetch("https://mixmix2.store/api/member/mypage", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserData(data); // 가져온 데이터를 상태에 저장
+        console.log("userdata:", data);
+      } else {
+        console.error("데이터 요청 실패", response.status);
+      }
+    } catch (error) {
+      console.error("프로필 데이터 불러오기 오류:", error);
+    } finally {
+      setLoading(false); 
+    }
+  };
+
+  useEffect(() => {
+    profileDetail();
+  }, []);
 
   useEffect(() => {
     loadUserInfo();
@@ -38,6 +72,7 @@ export default function MyProfile() {
   const loadUserInfo = async () => {
     try {
       const storedUserInfo = await AsyncStorage.getItem('userInfo');
+      console.log("userinfo:", userInfo);
       if (storedUserInfo) {
         setUserInfo(JSON.parse(storedUserInfo));
       }
@@ -88,21 +123,21 @@ export default function MyProfile() {
         <View style={styles.profileSection}>
           <View style={styles.streak}>
             <StreakIcon style={styles.streakIcon} />
-            <Text style={styles.streakNumber}>178</Text>
+            <Text style={styles.streakNumber}>{userInfo.streak}</Text>
           </View>
           <Text style={styles.universityName}>{userInfo.school}</Text>
 
           {/* 프로필 이미지 */}
           <View style={styles.profileImageContainer}>
-            <Svg width={155} height={150}>
+            <Svg width={144} height={144}>
               <Defs>
-                <ClipPath id="mixmix">
-                  <Path d="M77.5 23.3165C17.5702 -29.9316 -30.9666 17.0581 24.073 75C-30.9666 132.994 17.5702 179.984 77.5 126.684C137.43 179.932 185.967 132.942 130.927 75C185.967 17.006 137.43 -29.9838 77.5 23.3165Z" />
+              <ClipPath id="mixmix">
+                <Circle cx="72" cy="72" r="72" />
                 </ClipPath>
               </Defs>
               <SvgImage
                 href={
-                  userInfo?.profileImageUrl || 'https://via.placeholder.com/120'
+                  userInfo?.picture || 'https://via.placeholder.com/120'
                 }
                 width="100%"
                 height="100%"
@@ -131,12 +166,12 @@ export default function MyProfile() {
         <View style={styles.postsSection}>
           <View style={styles.postCategory}>
             <Text style={[styles.postLabel, {color: '#ff6152'}]}>Social</Text>
-            <Text style={styles.postCount}>45</Text>
+            <Text style={styles.postCount}>{userInfo.SocialCount}</Text>
           </View>
           <LineProfile />
           <View style={styles.postCategory}>
-            <Text style={[styles.postLabel, {color: '#7dc353'}]}>Edu</Text>
-            <Text style={styles.postCount}>51</Text>
+            <Text style={[styles.postLabel, {color: '#ff6152'}]}>Study</Text>
+            <Text style={styles.postCount}>{userInfo.studyCount}</Text>
           </View>
         </View>
 
@@ -166,10 +201,6 @@ export default function MyProfile() {
             ))}
           </View>
           <LineCalendar style={styles.lineCalendarLine} />
-          <LineCalendar style={styles.lineCalendarLine1} />
-          <LineCalendar style={styles.lineCalendarLine2} />
-          <LineCalendar style={styles.lineCalendarLine3} />
-          <LineCalendar style={styles.lineCalendarLine4} />
           <View style={styles.calendarDates}>
             {[...Array(31)].map((_, index) => (
               <View key={index} style={styles.date}>
@@ -205,6 +236,7 @@ export default function MyProfile() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -212,28 +244,26 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    // justifyContent: "space-between",
     alignItems: 'center',
-    padding: 16,
+    padding: height * 0.02,
     backgroundColor: '#f9f9f9',
   },
   headerText: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     textAlign: 'center',
-    justifyContent: 'center',
     fontFamily: 'Pretendard-SemiBold',
   },
   headerIcon: {
-    width: 24,
-    height: 24,
+    width: width * 0.06,
+    height: width * 0.06,
   },
   profileSection: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: height * 0.03,
     backgroundColor: '#fff',
   },
   universityName: {
-    fontSize: 12,
+    fontSize: width * 0.03,
     fontFamily: 'Pretendard-Regular',
     color: '#000',
   },
@@ -241,160 +271,153 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     position: 'absolute',
-    marginRight: 16,
-    right: 0,
-    borderRadius: 25,
+    right: width * 0.04,
+    borderRadius: width * 0.06,
     borderColor: '#d9d9d9',
     borderWidth: 1,
-    marginVertical: 8,
+    paddingVertical: height * 0.005,
+    marginTop: height * 0.01,
   },
   streakNumber: {
-    fontSize: 12,
+    fontSize: width * 0.03,
     fontFamily: 'Pretendard-Regular',
     color: '#000',
-    marginRight: 8,
-    marginTop: 4,
-    marginBottom: 4,
+    marginRight: width * 0.02,
   },
   streakIcon: {
-    width: 20,
-    height: 20,
-    marginLeft: 4,
+    width: width * 0.05,
+    height: width * 0.05,
+    marginLeft: width * 0.01,
   },
   profileImageContainer: {
     position: 'relative',
-    width: 155,
-    height: 150,
-    marginTop: 16,
+    width: width * 0.4,
+    height: height * 0.2,
+    marginTop: height * 0.02,
   },
   badge: {
     position: 'absolute',
-    marginTop: -11,
-    left: 9,
+    marginTop: height * -0.01,
+    left: width * 0.02,
   },
   editIcon: {
     position: 'absolute',
     right: 0,
-    bottom: 9,
-    marginRight: -16,
+    bottom: height * 0.02,
+    marginRight: width * 0.02,
   },
   profileNameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    color: '#000',
+    marginTop: height * 0.07,
   },
   profileName: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontFamily: 'Pretendard-SemiBold',
     color: '#000',
   },
   profileNation: {
-    fontSize: 12,
+    fontSize: width * 0.03,
     fontFamily: 'Pretendard-SemiBold',
-    marginLeft: 4,
+    marginLeft: width * 0.01,
     color: '#000',
   },
-
   message: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     fontFamily: 'Pretendard-Regular',
-    marginTop: 4,
+    marginTop: height * 0.005,
     color: '#333',
   },
   postsSection: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: height * 0.02,
     backgroundColor: '#ffffff',
   },
   postCategory: {
     alignItems: 'center',
   },
   line: {
-    width: '20%',
-    height: 2,
+    width: width * 0.2,
+    height: height * 0.002,
   },
   postLabel: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     fontFamily: 'Pretendard-Medium',
-    marginBottom: 8,
+    marginBottom: height * 0.01,
   },
   postCount: {
-    fontSize: 20,
+    fontSize: width * 0.05,
     fontFamily: 'Pretendard-SemiBold',
     color: '#000',
   },
   quizSection: {
-    flexDirection: 'row', // 아이콘과 텍스트를 가로로 정렬
-    alignItems: 'center', // 세로 정렬 가운데
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: height * 0.02,
     borderColor: '#d9d9d9',
-    borderRadius: 8,
+    borderRadius: width * 0.02,
     borderWidth: 0.5,
-    margin: 16,
-    backgroundColor: '#fff', // 배경색 추가
+    margin: height * 0.02,
+    backgroundColor: '#fff',
   },
   quizSectionPressable: {
-    flexDirection: 'row', // Pressable 내부 아이콘과 텍스트를 가로로 정렬
-    alignItems: 'center', // 세로 정렬 가운데
-    width: '100%', // Pressable 영역 확장
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
   },
   quizIcon: {
-    marginRight: 12, // 아이콘과 텍스트 사이 여백
+    marginRight: width * 0.03,
   },
   textGroup: {
-    flexDirection: 'column', // 텍스트는 세로로 쌓이도록 설정
+    flexDirection: 'column',
   },
   quizTitle: {
-    fontSize: 16,
+    fontSize: width * 0.04,
     fontWeight: 'bold',
     color: '#000',
   },
   quizSubtitle: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     color: '#666',
   },
   calendarSection: {
-    marginLeft: 16,
-    marginRight: 16,
-    borderRadius: 10,
-    padding: 16,
+    marginHorizontal: width * 0.04,
+    borderRadius: width * 0.025,
+    padding: height * 0.02,
     backgroundColor: '#222222',
   },
   weekDays: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginBottom: 8,
+    marginBottom: height * 0.01,
   },
   weekDay: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     fontWeight: 'bold',
     color: '#fff',
-    marginLeft: 12,
-    marginRight: 12,
+    marginHorizontal: width * 0.03,
   },
   calendarDates: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    // color: "#999999",
   },
   date: {
     flex: 1,
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: height * 0.01,
     flexBasis: '14.28%',
     maxWidth: '14.28%',
   },
   dateText: {
-    fontSize: 14,
+    fontSize: width * 0.035,
     fontFamily: 'Pretendard-Medium',
     color: '#999999',
   },
   dateSubtext: {
-    fontSize: 12,
+    fontSize: width * 0.03,
     textAlign: 'center',
     color: '#777',
   },
@@ -439,30 +462,6 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     justifyContent: 'center',
     position: 'absolute',
-  },
-  lineCalendarLine1: {
-    marginTop: 110,
-    position: 'absolute',
-    alignItems: 'center',
-    marginLeft: 4,
-  },
-  lineCalendarLine2: {
-    marginTop: 180,
-    position: 'absolute',
-    alignItems: 'center',
-    marginLeft: 4,
-  },
-  lineCalendarLine3: {
-    marginTop: 250,
-    position: 'absolute',
-    alignItems: 'center',
-    marginLeft: 4,
-  },
-  lineCalendarLine4: {
-    marginTop: 320,
-    position: 'absolute',
-    alignItems: 'center',
-    marginLeft: 4,
   },
   lineUnderCal: {
     marginVertical: 26,

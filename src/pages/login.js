@@ -1,109 +1,150 @@
-import React, { useState } from 'react';
-import { Pressable, View, Image, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login, getProfile } from '@react-native-seoul/kakao-login';
-import LogoIconBig from '../images/logo_text_big.svg';
-import { useNavigation } from '@react-navigation/native';
 
-const Login = () => {
-  const [result, setResult] = useState('');
-  const navigation = useNavigation();
+const Quiz = ({ navigation }) => {
+  const [quiz, setQuiz] = useState(null); // 퀴즈 데이터를 저장할 상태
+  const [selectedOption, setSelectedOption] = useState(null); // 선택된 답변
+  const [isCorrect, setIsCorrect] = useState(null); // 정답 여부
+  const [showModal, setShowModal] = useState(false); // 모달 표시 상태
 
-  // 로그인 처리
-  const signInWithKakao = async () => {
+  // 퀴즈 데이터 생성 요청 함수 (POST)
+  const fetchQuiz = async () => {
     try {
-      // 초기화 (저장된 모든 데이터 삭제)
-      await AsyncStorage.removeItem('kakaoToken');
-      await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('refreshToken');
-      await AsyncStorage.removeItem('userInfo');
-
-      // 카카오 로그인
-      const token = await login();
-      console.log('로그인 성공, 토큰: ', token);
-      setResult('로그인 성공, 토큰: ' + JSON.stringify(token));
-
-      // 토큰 저장
-      await AsyncStorage.setItem('kakaoToken', token.accessToken);
-
-      // 사용자 프로필 정보 가져오기
-      const userProfile = await getProfile();
-      console.log('사용자 프로필:', userProfile);
-
-      // 사용자 정보 저장
-      const profileData = {
-        email: userProfile.email || '',
-        nickname: userProfile.nickname || '',
-        profileImageUrl: userProfile.profileImageUrl || '',
-        nation: 'kr',
-        school: '구름대학교',
-        introduction: '저희 동네친구 할래요?',
-      };
-      await AsyncStorage.setItem('userInfo', JSON.stringify(profileData));
-
-      // 서버에서 accessToken과 refreshToken 받기
-      const tokens = await getTokens(token.idToken);
-
-      if (tokens) {
-        await AsyncStorage.setItem('accessToken', tokens.accessToken);
-        await AsyncStorage.setItem('refreshToken', tokens.refreshToken);
-        setResult(
-          `accessToken: ${tokens.accessToken}, refreshToken: ${tokens.refreshToken}`
-        );
-
-        // ProfileInfo 페이지로 프로필 데이터와 함께 이동
-        navigation.navigate('ProfileInfo', { profileData });
-      }
-    } catch (err) {
-      console.error('로그인 오류:', err);
-      setResult('로그인 실패: ' + (err?.message || '알 수 없는 오류'));
-      Alert.alert('로그인 실패', err?.message || '알 수 없는 오류');
-    }
-  };
-
-  // 서버에서 accessToken과 refreshToken을 받아오는 함수
-  const getTokens = async (idToken) => {
-    try {
-      const response = await fetch('https://mixmix2.store/api/kakao/token', {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const response = await fetch('https://mixmix2.store/api/quiz', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json', // JSON 형식으로 요청
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          authCode: idToken,
-        }),
+        body: JSON.stringify({}), // 빈 객체를 JSON 형식으로 보냄
       });
 
       if (!response.ok) {
-        const errorBody = await response.json();
-        throw new Error(`서버 오류: ${errorBody.message || '알 수 없는 오류'}`);
+        throw new Error('퀴즈를 가져오는 데 실패했습니다.');
       }
 
-      const responseBody = await response.json();
-      console.log('서버 응답:', responseBody);
+      const data = await response.json(); // JSON 형태로 응답 받기
+      setQuiz(data); // 퀴즈 데이터 상태에 저장
 
-      const { accessToken, refreshToken } = responseBody.data;
+      // 퀴즈 데이터 로그 출력
+      console.log('Fetched quiz:', data); // 이 부분을 추가하여 퀴즈 데이터 출력
 
-      if (!accessToken || !refreshToken) {
-        throw new Error('access token / refresh token이 서버 응답에 없음');
-      }
-
-      return { accessToken, refreshToken };
     } catch (error) {
-      console.error('API 호출 오류:', error);
-      throw error;
+      console.error('퀴즈를 가져오는 데 오류가 발생했습니다:', error);
+    }
+  };
+
+  // 컴포넌트가 마운트될 때 퀴즈 데이터 가져오기
+  useEffect(() => {
+    fetchQuiz(); // 페이지 진입 시 자동으로 퀴즈를 가져옴
+  }, []);
+
+  if (!quiz) {
+    return <Text>퀴즈를 로딩 중...</Text>; // 퀴즈가 로딩 중이면 이 메시지 표시
+  }
+
+  // 정답 제출 처리
+  const handleSubmit = async () => {
+    if (selectedOption) {
+      // 정답 처리 (POST 요청)
+      if (selectedOption.text === quiz.answer) {
+        try {
+          const accessToken = await AsyncStorage.getItem('accessToken');
+          const response = await fetch('https://mixmix2.store/api/quiz/correct-answer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              // 필요한 데이터 추가 가능
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('정답 제출에 실패했습니다.');
+          }
+
+          setIsCorrect(true);
+        } catch (error) {
+          console.error('정답 제출 오류:', error);
+          setIsCorrect(false);
+        }
+      } else {
+        // 오답 처리 (GET 요청)
+        try {
+          const accessToken = await AsyncStorage.getItem('accessToken');
+          const response = await fetch('https://mixmix2.store/api/quiz/incorrect-answer', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('오답 제출에 실패했습니다.');
+          }
+
+          setIsCorrect(false);
+        } catch (error) {
+          console.error('오답 제출 오류:', error);
+          setIsCorrect(false);
+        }
+      }
+
+      setShowModal(true); // 모달 표시
+    } else {
+      alert('답변을 선택해주세요.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <LogoIconBig style={styles.logo} />
-      <Pressable style={styles.loginButton} onPress={signInWithKakao}>
-        <Image
-          source={require('../images/kakao_login.png')}
-          style={styles.image}
-        />
+      {/* 헤더 */}
+      <Text style={styles.headerTitle}>오늘의 퀴즈</Text>
+
+      {/* 문제 텍스트 */}
+      <ScrollView contentContainerStyle={styles.questionContainer}>
+        <Text style={styles.questionText}>{quiz.question}</Text>
+
+        {/* 답변 옵션 */}
+        {[{
+          text: quiz.option1, id: 1
+        }, {
+          text: quiz.option2, id: 2
+        }, {
+          text: quiz.option3, id: 3
+        }, {
+          text: quiz.option4, id: 4
+        }].map((option) => (
+          <Pressable
+            key={option.id}
+            style={[styles.optionButton, selectedOption?.id === option.id && styles.selectedOption]}
+            onPress={() => setSelectedOption(option)}
+          >
+            <Text style={styles.optionText}>{option.text}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      {/* 제출 버튼 */}
+      <Pressable style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>제출하기</Text>
       </Pressable>
+
+      {/* 정답/오답 모달 */}
+      {isCorrect !== null && (
+        <Modal transparent visible={showModal} animationType="slide" onRequestClose={() => setShowModal(false)}>
+          {isCorrect ? (
+            <Text>정답입니다!</Text> // 정답 모달 내용
+          ) : (
+            <Text>오답입니다.</Text> // 오답 모달 내용
+          )}
+        </Modal>
+      )}
     </View>
   );
 };
@@ -111,23 +152,50 @@ const Login = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#fff',
+    padding: 20,
   },
-  loginButton: {
-    marginTop: 20,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
-  image: {
-    width: 300,
-    height: 50,
-    marginTop: 200,
-    resizeMode: 'contain',
-  },
-  logo: {
+  questionContainer: {
+    paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 130,
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  optionButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#F6F6F6',
+    borderRadius: 25,
+    width: '85%',
+  },
+  selectedOption: {
+    backgroundColor: 'rgba(255, 97, 82, 0.7)',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  submitButton: {
+    backgroundColor: '#FF6152',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
-export default Login;
+export default Quiz;
