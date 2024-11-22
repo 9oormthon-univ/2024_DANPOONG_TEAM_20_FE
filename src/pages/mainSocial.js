@@ -105,10 +105,13 @@ const MainSocial = ({navigation}) => {
             {/* 프로필 영역 */}
             <View style={styles.profileContainer}>
               <View style={styles.profileInfo}>
+                {/*여기서 이거 누르면 otherinfo로 넘어가게 해줘야함 */}
+                <Pressable>
                 <Image
                   source={{uri: item.profileImage}}
                   style={styles.profileImage}
                 />
+                </Pressable>
                 <View style={styles.profileText}>
                   <Text style={styles.name}>
                     {item.name} <Text style={styles.flag}>{item.flag}</Text>

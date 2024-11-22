@@ -6,8 +6,8 @@ import CountryFlag from 'react-native-country-flag'; // 추가
 
 const ProfileInfo = ({ route, navigation }) => {
   const { profileData } = route.params; // 카카오 프로필 데이터
-  const [school, setSchool] = useState(profileData.school || ''); // 기존 school 데이터로 초기화
-  const [country, setCountry] = useState(profileData.nation || ''); // 기존 nation 데이터로 초기화
+  const [school, setSchool] = useState(profileData.school); // 기존 school 데이터로 초기화
+  const [country, setCountry] = useState(profileData.nation); // 기존 nation 데이터로 초기화
 
   const handleSave = async () => {
     try {
@@ -25,8 +25,8 @@ const ProfileInfo = ({ route, navigation }) => {
         },
         body: JSON.stringify({
           introduction: profileData.introduction,
-          nationality: country || '',
-          school: school || '',
+          nationality: country,
+          school: school,
           nickname: profileData.nickname,
         }),
       });

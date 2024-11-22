@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, TextInput, Pressable } from "react-native";
 import { initializeWebSocket, sendMessage } from "../utils/websocket";
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 추가: 사용자 정보 가져오기
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Dm = ({ route }) => {
-  const { recipientName } = route?.params || {}; // 안전하게 파라미터 확인
+  const { recipientName } = route?.params || {}; // 파라미터 확인용
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
+  const [translatedMessage, setTranslatedMessage] = useState(""); // 번역된 메시지 상태 추가
   const [userInfo, setUserInfo] = useState(null);
 
   // 로그인된 사용자 정보 가져오기
@@ -34,7 +35,7 @@ const Dm = ({ route }) => {
     };
 
     // 기존 메시지 불러오기 (recipientName 사용)
-    fetch(`https://mixmix2.store/api/chat-rooms?recipientName=${recipientName}`)
+    fetch(`https://mixmix2.store/api/chat-rooms?${recipientName}`)
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch((err) => console.error("메시지 로드 오류:", err));
@@ -48,13 +49,41 @@ const Dm = ({ route }) => {
       const newMessage = {
         sender: userInfo?.nickname, // 현재 사용자 카카오 닉네임
         recipient: recipientName, // 수신자 이름
-        content: messageInput,
+        content: translatedMessage || messageInput, // 번역된 메시지가 있으면 번역된 텍스트 사용
         timestamp: new Date().toISOString(),
       };
 
       sendMessage(newMessage); // WebSocket을 통해 메시지 전송
       setMessages((prev) => [...prev, newMessage]); // 로컬에서 메시지 추가
       setMessageInput(""); // 입력 필드 초기화
+      setTranslatedMessage(""); // 번역된 메시지 초기화
+    }
+  };
+
+  // DeepL API를 사용하여 메시지 번역
+  const handleTranslate = async () => {
+    if (!messageInput.trim()) return;
+
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const response = await fetch("http://mixmix2.store/api/translations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: new URLSearchParams({
+          text: messageInput,
+          target_lang: "JA", // 번역할 언어 (영어로 설정)
+        }),
+      });
+
+      const result = await response.json();
+      if (result.translations && result.translations.length > 0) {
+        setTranslatedMessage(result.translations[0].text); // 번역된 텍스트 설정
+      }
+    } catch (error) {
+      console.error("번역 오류:", error);
     }
   };
 
@@ -86,10 +115,18 @@ const Dm = ({ route }) => {
           onChangeText={setMessageInput}
           placeholder="메시지를 입력하세요"
         />
+        <Pressable style={styles.translateButton} onPress={handleTranslate}>
+          <Text style={styles.buttonText}>번역</Text>
+        </Pressable>
         <Pressable style={styles.sendButton} onPress={handleSendMessage}>
           <Text style={styles.sendButtonText}>전송</Text>
         </Pressable>
       </View>
+      {translatedMessage ? (
+        <Text style={styles.translatedText}>
+          번역된 메시지: {translatedMessage}
+        </Text>
+      ) : null}
     </View>
   );
 };
@@ -115,6 +152,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: "row",
+    flexWrap: "wrap",  // 이 부분 추가: 버튼들이 화면에 잘 배치되도록
     alignItems: "center",
     marginTop: 10,
   },
@@ -130,11 +168,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 10,
+    minWidth: 80,  // 버튼 크기를 지정
   },
   sendButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },
+  translateButton: {
+    marginLeft: 10,
+    backgroundColor: "#28a745",
+    position: "absolute",
+    padding: 10,
+    borderRadius: 10,
+    minWidth: 80,  // 버튼 크기 지정
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  translatedText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: "#888",
+  },
 });
+
 
 export default Dm;
