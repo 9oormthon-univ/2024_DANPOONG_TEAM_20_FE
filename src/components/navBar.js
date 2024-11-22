@@ -10,6 +10,7 @@ import RankIcon from '../images/navBar_rank.svg';
 import RankIconActive from '../images/navBar_rank_active.svg';
 import ProfileIcon from '../images/navBar_profile.svg';
 import ProfileIconActive from '../images/navBar_profile_active.svg';
+import DmList from '../pages/dmList';
 
 const {width, height} = Dimensions.get('window');
 
@@ -20,7 +21,7 @@ const tabs = [
     icon: HomeIcon,
     activeIcon: HomeIconActive,
   },
-  {name: 'DmList', routes: ['DmList'], icon: DmIcon},
+  {name: 'dm', routes: ['dm'], icon: DmIcon},
   {name: 'Camera', routes: ['Camera'], icon: CameraIcon},
   {name: 'Rank', routes: ['Rank'], icon: RankIcon, activeIcon: RankIconActive},
   {

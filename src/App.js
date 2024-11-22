@@ -35,7 +35,7 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={isLoggedIn ? 'MainSocial' : 'Login'}>
+      <Stack.Navigator initialRouteName={isLoggedIn ? 'mainSocial' : 'Login'}>
         <Stack.Screen
         name="OtherProfile"
         component={OtherProfile}

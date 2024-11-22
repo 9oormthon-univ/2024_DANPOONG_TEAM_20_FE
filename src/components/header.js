@@ -49,7 +49,7 @@ const Header = ({navigation}) => {
               styles.tabText,
               activeTab === 'Edu' && styles.activeTabEduText,
             ]}>
-            Edu
+            Study
           </Text>
         </Pressable>
       </View>
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   activeTabEduText: {
-    color: '#7DC353',
+    color: '#FF6152',
     fontWeight: 'bold',
   },
 });

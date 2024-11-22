@@ -8,7 +8,7 @@ const notificationData = {
   today: [
     {
       id: 1,
-      avatar: "https://via.placeholder.com/40",
+      profile: "https://via.placeholder.com/40",
       username: "julie 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3시간",
@@ -18,7 +18,7 @@ const notificationData = {
   yesterday: [
     {
       id: 2,
-      avatar: "https://via.placeholder.com/40",
+      profile: "https://via.placeholder.com/40",
       username: "julie 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "19시간",
@@ -28,7 +28,7 @@ const notificationData = {
   recentWeek: [
     {
       id: 3,
-      avatar: "https://via.placeholder.com/40",
+      profile: "https://via.placeholder.com/40",
       username: "kibbeum 🇰🇷",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "2일",
@@ -36,7 +36,7 @@ const notificationData = {
     },
     {
       id: 4,
-      avatar: "https://via.placeholder.com/40",
+      profile: "https://via.placeholder.com/40",
       username: "tommy 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3일",
@@ -44,7 +44,7 @@ const notificationData = {
     },
     {
       id: 5,
-      avatar: "https://via.placeholder.com/40",
+      profile: "https://via.placeholder.com/40",
       username: "julie0201 🇩🇪",
       message: "님이 회원님의 게시물을 좋아합니다.",
       timeAgo: "3일",
@@ -53,13 +53,13 @@ const notificationData = {
   ]
 };
 
-const NotificationItem = ({ avatar, username, message, timeAgo, postImage }) => {
+const NotificationItem = ({ profile, username, message, timeAgo, postImage }) => {
   return (
     <View style={styles.notificationContainer}>
       <Image
         resizeMode="contain"
-        source={{ uri: avatar }}
-        style={styles.avatarImage}
+        source={{ uri: profile }}
+        style={styles.profile}
       />
       <View style={styles.messageContainer}>
         <Text style={styles.messageText}>{username} {message}</Text>
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  avatarImage: {
+  profile: {
     width: 40,
     height: 40,
     borderRadius: 20,
