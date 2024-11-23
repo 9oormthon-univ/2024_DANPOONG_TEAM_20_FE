@@ -13,6 +13,10 @@ import Login from './pages/login';
 import Feed from './pages/feed';
 import Upload from './pages/upload';
 import Quiz from './pages/quiz';
+import ProfileInfo from './pages/profileInfo';
+import Notification from './pages/notification';
+import OtherProfile from './pages/otherProfile';
+import DmList  from './pages/dmList';
 
 const Stack = createStackNavigator();
 
@@ -33,8 +37,23 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName={isLoggedIn ? 'MainSocial' : 'Login'}>
         <Stack.Screen
+        name="OtherProfile"
+        component={OtherProfile}
+        options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="MainSocial"
           component={MainSocial}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="Notification"
+          component={Notification}
+          options={{headerShown: false}}
+        />        
+        <Stack.Screen
+          name="ProfileInfo"
+          component={ProfileInfo}
           options={{headerShown: false}}
         />
         <Stack.Screen
@@ -61,6 +80,11 @@ const App = () => {
           name="Dm"
           component={Dm}
           options={{title: 'Direct Messages'}}
+        />
+        <Stack.Screen
+          name="DmList"
+          component={DmList}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="Camera"
