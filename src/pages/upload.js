@@ -69,7 +69,6 @@ const Upload = ({route, navigation}) => {
     }
 
     const formData = new FormData();
-
     formData.append(
       'feedSaveReqDto',
       JSON.stringify({
@@ -80,7 +79,7 @@ const Upload = ({route, navigation}) => {
     );
 
     // 파일 확장자 동적 처리
-    const fileType = 'jpeg'; // 강제 설정
+    const fileType = 'jpeg';
     formData.append('feedImage', {
       uri: `file://${photo.path}`, // 파일 경로
       name: `photo.${fileType}`, // 파일 이름
@@ -88,10 +87,12 @@ const Upload = ({route, navigation}) => {
     });
 
     try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
       const response = await fetch('https://mixmix2.store/api/feed', {
         method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data', // FormData 전송
+          // 'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
         },
         body: formData,
       });

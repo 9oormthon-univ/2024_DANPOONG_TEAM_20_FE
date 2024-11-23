@@ -8,14 +8,14 @@ import {
   Dimensions,
   Text,
 } from 'react-native';
-import BackIcon from '../images/back_white.svg'; // 뒤로가기 아이콘
-import RetryIcon from '../images/retry.svg'; // 다시 찍기 아이콘 (텍스트 포함)
-import NextIcon from '../images/next.svg'; // 다음 버튼 아이콘 (텍스트 포함)
+import BackIcon from '../images/back_white.svg';
+import RetryIcon from '../images/retry.svg';
+import NextIcon from '../images/next.svg';
 
-const {width, height} = Dimensions.get('window'); // 화면 크기 가져오기
+const {width, height} = Dimensions.get('window');
 
 const PhotoReview = ({route, navigation}) => {
-  const {photo} = route.params || {}; // 전달받은 photo 객체
+  const {photo} = route.params || {}; // CameraScreen에서 전달된 photo 객체
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,13 +28,13 @@ const PhotoReview = ({route, navigation}) => {
         </Pressable>
       </View>
 
-      {/* 전달된 사진 렌더링 */}
+      {/* 촬영된 사진 렌더링 */}
       <View style={styles.imageContainer}>
-        {photo ? (
+        {photo && photo.path ? (
           <Image
-            source={{uri: `file://${photo.path}`}}
+            source={{uri: `file://${photo.path}`}} // 사진 경로를 사용하여 이미지 렌더링
             style={styles.image}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         ) : (
           <View style={styles.noPhotoContainer}>
@@ -45,16 +45,16 @@ const PhotoReview = ({route, navigation}) => {
 
       {/* 하단 버튼 */}
       <View style={styles.buttonContainer}>
+        {/* 다시 찍기 버튼 */}
         <Pressable
           style={styles.resetButton}
           onPress={() => navigation.navigate('Camera')}>
-          {/* retry.svg 반응형 크기 적용 */}
           <RetryIcon width={width * 0.25} height={width * 0.25} />
         </Pressable>
+        {/* 다음 단계 버튼 */}
         <Pressable
           style={styles.nextButton}
           onPress={() => navigation.navigate('Upload', {photo})}>
-          {/* next.svg 반응형 크기 적용 */}
           <NextIcon width={width * 0.25} height={width * 0.25} />
         </Pressable>
       </View>
@@ -65,7 +65,7 @@ const PhotoReview = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // 검은 배경
+    backgroundColor: '#000',
   },
   header: {
     flexDirection: 'row',
@@ -81,11 +81,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#444', // 임시 배경색
+    backgroundColor: '#000', // 배경 색
   },
   image: {
     width: '90%',
     height: '90%',
+    borderRadius: 1, // 이미지 모서리 라운딩
   },
   noPhotoContainer: {
     justifyContent: 'center',
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: width * 0.05, // 버튼 간격을 화면 너비에 비례하여 조정
+    paddingHorizontal: width * 0.05,
     paddingBottom: height * 0.02,
   },
 });

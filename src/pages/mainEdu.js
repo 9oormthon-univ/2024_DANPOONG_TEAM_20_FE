@@ -10,9 +10,8 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import NavBar from '../components/navBar';
-import Header from '../components/header'; // Header 추가
+import Header from '../components/header';
 import OptionIcon from '../images/option.svg'; // 더보기 아이콘
 
 const {width, height} = Dimensions.get('window'); // 화면 크기 가져오기
@@ -22,32 +21,7 @@ const MainEdu = ({navigation, route}) => {
   const [posts, setPosts] = useState([]); // 게시글 데이터 상태
   const hashtags = ['#언어', '#전공', '#질문', '#구인']; // 해시태그 리스트
 
-  // 상태를 AsyncStorage에 저장
-  const saveActiveTags = async tags => {
-    try {
-      await AsyncStorage.setItem('eduActiveTags', JSON.stringify(tags));
-    } catch (error) {
-      console.error('태그 상태 저장 실패:', error);
-    }
-  };
-
-  // AsyncStorage에서 상태 불러오기
-  const loadActiveTags = async () => {
-    try {
-      const savedTags = await AsyncStorage.getItem('eduActiveTags');
-      if (savedTags) {
-        setActiveTags(JSON.parse(savedTags));
-      }
-    } catch (error) {
-      console.error('태그 상태 불러오기 실패:', error);
-    }
-  };
-
-  useEffect(() => {
-    loadActiveTags(); // 컴포넌트가 렌더링될 때 상태 불러오기
-  }, []);
-
-  // 새 게시글 추가
+  // `Upload.js`에서 전달된 새로운 게시글 데이터
   useEffect(() => {
     if (route.params?.newPost) {
       setPosts(prevPosts => [route.params.newPost, ...prevPosts]);
@@ -55,11 +29,13 @@ const MainEdu = ({navigation, route}) => {
   }, [route.params?.newPost]);
 
   const toggleTag = tag => {
-    const updatedTags = activeTags.includes(tag)
-      ? activeTags.filter(activeTag => activeTag !== tag) // 선택 해제
-      : [...activeTags, tag]; // 선택 추가
-    setActiveTags(updatedTags);
-    saveActiveTags(updatedTags); // 상태 저장
+    if (activeTags.includes(tag)) {
+      // 이미 선택된 태그라면 제거
+      setActiveTags(activeTags.filter(activeTag => activeTag !== tag));
+    } else {
+      // 선택되지 않은 태그라면 추가
+      setActiveTags([...activeTags, tag]);
+    }
   };
 
   return (
