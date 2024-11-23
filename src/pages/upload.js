@@ -44,7 +44,7 @@ const Upload = ({route, navigation}) => {
 
   const hashtagsByCategory = {
     Social: ['#음식', '#K-POP', '#핫플', '#질문', '#구인'],
-    Edu: ['#언어', '#전공', '#질문', '#구인'],
+    Study: ['#언어', '#전공', '#질문', '#구인'],
   };
 
   const currentHashtags = hashtagsByCategory[selectedCategory] || [];
@@ -69,14 +69,16 @@ const Upload = ({route, navigation}) => {
     }
 
     const formData = new FormData();
-    formData.append(
-      'feedSaveReqDto',
-      JSON.stringify({
-        contents: postText,
-        hashTags: selectedTags.join(', '),
-        feedType: selectedCategory.toUpperCase(),
-      }),
-    );
+    const requestData = {
+      contents: postText,
+      hashTags: selectedTags.join(', '),
+      feedType: selectedCategory.toUpperCase(),
+    };
+
+    // 요청 데이터를 로깅하여 확인
+    console.log('Request Data:', requestData);
+
+    formData.append('feedSaveReqDto', JSON.stringify(requestData));
 
     // 파일 확장자 동적 처리
     const fileType = 'jpeg';
@@ -101,7 +103,7 @@ const Upload = ({route, navigation}) => {
         const responseData = await response.json(); // 서버 응답 데이터 가져오기
         Alert.alert('성공', '피드가 성공적으로 업로드되었습니다.');
         navigation.navigate(
-          selectedCategory === 'Social' ? 'MainSocial' : 'MainEdu',
+          selectedCategory === 'Social' ? 'MainSocial' : 'MainStudy',
           {
             newPost: responseData.data, // 업로드한 게시글 데이터 전달
           },

@@ -9,10 +9,18 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useFocusEffect} from '@react-navigation/native';
 import NavBar from '../components/navBar';
 import Header from '../components/header';
+
+// 로컬 이미지 불러오기
+const dummy1 = require('../images/dummy1.png');
+const dummy2 = require('../images/dummy2.png');
+const dummy3 = require('../images/dummy3.png');
+const dummy4 = require('../images/dummy4.png');
+const dummy_profile1 = require('../images/dummy_profile1.jpg');
+const dummy_profile2 = require('../images/dummy_profile2.jpg');
+const dummy_profile3 = require('../images/dummy_profile3.jpg');
+const dummy_profile4 = require('../images/dummy_profile4.jpg');
 
 const {width, height} = Dimensions.get('window');
 
@@ -31,52 +39,54 @@ const formatDate = dateString => {
   return `${month}월 ${day}일 ${hours}:${minutes}${ampm}`;
 };
 
-const MainSocial = ({navigation, route}) => {
-  const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]); // 필터링된 게시글 상태
+const MainStudy = ({navigation, route}) => {
+  const [posts, setPosts] = useState([
+    {
+      id: '1',
+      memberImage: dummy_profile3,
+      memberName: '최도현',
+      createdAt: '2024-11-24T10:00:00Z',
+      feedImage: dummy1,
+      contents: '타입스크립트 재밌당',
+      hashTags: ['#언어'],
+    },
+    {
+      id: '2',
+      memberImage: dummy_profile2,
+      memberName: 'Jamie',
+      createdAt: '2024-11-23T14:00:00Z',
+      feedImage: dummy2,
+      contents: 'Working on a writing assignment',
+      hashTags: ['#전공'],
+    },
+    {
+      id: '3',
+      memberImage: dummy_profile1,
+      memberName: '김지원',
+      createdAt: '2024-11-22T16:00:00Z',
+      feedImage: dummy3,
+      contents: '대수2 질문 받아주실분 구해요ㅠㅠ',
+      hashTags: ['#질문', '#구인'],
+    },
+    {
+      id: '4',
+      memberImage: dummy_profile4,
+      memberName: 'Kevin',
+      createdAt: '2024-11-21T18:00:00Z',
+      feedImage: dummy4,
+      contents: '대학영어 공부 팁 공유합니다~',
+      hashTags: ['#언어'],
+    },
+  ]);
+  const [filteredPosts, setFilteredPosts] = useState(posts); // 필터링된 게시글 상태
   const [activeTags, setActiveTags] = useState([]);
-  const hashtags = ['#음식', '#K-POP', '#핫플', '#질문', '#구인'];
+  const hashtags = ['#언어', '#전공', '#질문', '#구인']; // STUDY 해시태그
 
   useEffect(() => {
     if (route.params?.newPost) {
       setPosts(prevPosts => [route.params.newPost, ...prevPosts]);
     }
   }, [route.params?.newPost]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const accessToken = await AsyncStorage.getItem('accessToken');
-
-      try {
-        const response = await fetch(
-          'https://mixmix2.store/api/feed/all?keyword=SOCIAL&nationality=kr&page=0&size=10',
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const feedDataWithProfiles = data.data.feedListResDto.map(feed => ({
-            ...feed,
-            memberImage: feed.memberImage || 'https://via.placeholder.com/40',
-            memberName: feed.memberName || '익명',
-          }));
-          setPosts(feedDataWithProfiles || []);
-          setFilteredPosts(feedDataWithProfiles || []); // 초기값 설정
-        } else {
-          console.error('API 호출 실패:', response.status);
-        }
-      } catch (error) {
-        console.error('네트워크 오류:', error);
-      }
-    };
-
-    fetchPosts();
-  }, []);
 
   // 해시태그 버튼 클릭 시 태그 활성화/비활성화
   const toggleTag = tag => {
@@ -147,7 +157,7 @@ const MainSocial = ({navigation, route}) => {
                     })
                   }>
                   <Image
-                    source={{uri: item.memberImage}}
+                    source={item.memberImage}
                     style={styles.profileImage}
                   />
                 </Pressable>
@@ -169,10 +179,7 @@ const MainSocial = ({navigation, route}) => {
                 onPress={() =>
                   navigation.navigate('Feed', {feedId: item.feedId})
                 }>
-                <Image
-                  source={{uri: item.feedImage}}
-                  style={styles.contentImage}
-                />
+                <Image source={item.feedImage} style={styles.contentImage} />
               </Pressable>
               <Text style={styles.postText}>{item.contents}</Text>
             </View>
@@ -239,7 +246,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: width * 0.1,
     height: width * 0.1,
-    borderRadius: (width * 0.1) / 2,
+    borderRadius: width * 0.05,
     marginRight: width * 0.03,
   },
   profileText: {
@@ -256,7 +263,8 @@ const styles = StyleSheet.create({
   },
   contentImage: {
     width: '100%',
-    aspectRatio: 1,
+    height: height * 0.5,
+    resizeMode: 'cover',
     borderRadius: width * 0.02,
     marginBottom: height * 0.015,
   },
@@ -267,4 +275,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MainSocial;
+export default MainStudy;

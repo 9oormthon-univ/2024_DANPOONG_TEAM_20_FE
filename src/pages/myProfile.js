@@ -27,6 +27,9 @@ import ProfileEditIcon from '../images/profileEditIcon.svg';
 import LineUnderCal from '../images/lineUnderCal.svg';
 import NavBar from '../components/navBar';
 import ProfileEdit from './profileEdit';
+import Rank1 from '../images/rank_1.svg';
+import Rank2 from '../images/rank_2.svg';
+import Rank3 from '../images/rank_3.svg';
 
 const {width, height} = Dimensions.get('window');
 
@@ -160,7 +163,9 @@ export default function MyProfile() {
                 preserveAspectRatio="xMidYMid slice"
               />
             </Svg>
-            <BadgeIcon style={styles.badge} />
+            {userInfo?.streakRank === 1 && <Rank1 style={styles.badge} />}
+            {userInfo?.streakRank === 2 && <Rank2 style={styles.badge} />}
+            {userInfo?.streakRank === 3 && <Rank3 style={styles.badge} />}
             <Pressable onPress={handleProfileEdit}>
               <ProfileEditIcon style={styles.editIcon} />
             </Pressable>
@@ -218,9 +223,7 @@ export default function MyProfile() {
             {[...Array(31)].map((_, index) => (
               <View key={index} style={styles.date}>
                 <Text style={styles.dateText}>{index + 1}</Text>
-                {index < 30 && (
-                  <Text style={styles.dateSubtext}>더미 텍스트</Text>
-                )}
+                {index < 30 && <Text style={styles.dateSubtext}></Text>}
               </View>
             ))}
           </View>
@@ -275,8 +278,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   universityName: {
+    alignItems: 'center',
     fontSize: width * 0.03,
-    fontFamily: 'Pretendard-Regular',
+    fontWeight: 'bold',
     color: '#000',
   },
   streak: {
@@ -309,8 +313,8 @@ const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    marginTop: height * -0.01,
-    left: width * 0.02,
+    marginTop: height * 0.001,
+    left: width * 0.04,
   },
   editIcon: {
     position: 'absolute',
@@ -325,7 +329,7 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: width * 0.04,
-    fontFamily: 'Pretendard-SemiBold',
+    fontWeight: 'bold',
     color: '#000',
   },
   profileNation: {
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
   },
   postLabel: {
     fontSize: width * 0.035,
-    fontFamily: 'Pretendard-Medium',
+    fontWeight: 'bold',
     marginBottom: height * 0.01,
   },
   postCount: {
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
   },
   quizTitle: {
     fontSize: width * 0.04,
-    fontFamily: 'Pretendard-SemiBold',
+    fontWeight: 'bold',
     color: '#000',
   },
   quizSubtitle: {
@@ -460,7 +464,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 32,
     paddingHorizontal: 4,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderColor: '#767676',
   },
   logoutContainer: {

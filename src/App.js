@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MainSocial from './pages/mainSocial';
-import MainEdu from './pages/mainEdu';
+import MainStudy from './pages/mainStudy';
 import MyProfile from './pages/myProfile';
 import Dm from './pages/dm';
 import Camera from './pages/camera';
@@ -14,7 +14,7 @@ import Feed from './pages/feed';
 import Upload from './pages/upload';
 import Quiz from './pages/quiz';
 import OtherProfile from './pages/otherProfile';
-import DmChat from './pages/otherProfile';
+import DmChat from './pages/dmChat';
 
 const Stack = createStackNavigator();
 
@@ -45,8 +45,8 @@ const App = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="MainEdu"
-          component={MainEdu}
+          name="MainStudy"
+          component={MainStudy}
           options={{headerShown: false}}
         />
         <Stack.Screen

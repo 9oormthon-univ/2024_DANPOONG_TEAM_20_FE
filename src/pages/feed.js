@@ -253,11 +253,10 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 14,
     fontWeight: 'bold',
-    fontFamily: 'Pretendard-Medium',
+    color: '#000',
   },
   time: {
     fontSize: 12,
-    fontFamily: 'Pretendard-Regular',
     color: '#888',
   },
   optionButton: {
@@ -271,7 +270,7 @@ const styles = StyleSheet.create({
   },
   feedText: {
     fontSize: 14,
-    color: '#333',
+    color: '#000',
     marginBottom: 8,
   },
   commentContainer: {

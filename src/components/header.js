@@ -12,8 +12,8 @@ const Header = ({navigation}) => {
   useEffect(() => {
     if (route.name === 'MainSocial') {
       setActiveTab('Social');
-    } else if (route.name === 'MainEdu') {
-      setActiveTab('Edu');
+    } else if (route.name === 'MainStudy') {
+      setActiveTab('Study');
     }
   }, [route.name]);
 
@@ -22,7 +22,7 @@ const Header = ({navigation}) => {
       {/* 상단 로고와 알림 버튼 */}
       <View style={styles.topBar}>
         {/* 로고 추가 */}
-        <LogoIcon width={120} height={24} />
+        <LogoIcon width={120} height={24} style={styles.logo} />
         <Pressable style={styles.notification}>
           <NotificationIcon width={24} height={24} />
         </Pressable>
@@ -42,14 +42,14 @@ const Header = ({navigation}) => {
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.tab, activeTab === 'Edu' && styles.activeTabEdu]}
-          onPress={() => navigation.navigate('MainEdu')}>
+          style={[styles.tab, activeTab === 'Study' && styles.activeTabStudy]}
+          onPress={() => navigation.navigate('MainStudy')}>
           <Text
             style={[
               styles.tabText,
-              activeTab === 'Edu' && styles.activeTabEduText,
+              activeTab === 'Study' && styles.activeTabStudyText,
             ]}>
-            Edu
+            Study
           </Text>
         </Pressable>
       </View>
@@ -68,8 +68,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 16, // 기존 16px
     paddingVertical: 12,
+  },
+  logo: {
+    marginLeft: -18, // 로고를 왼쪽으로 이동
   },
   notification: {
     width: 24,
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderBottomColor: '#FF6152',
   },
-  activeTabEdu: {
+  activeTabStudy: {
     borderBottomWidth: 3,
     borderBottomColor: '#7DC353',
   },
@@ -102,7 +105,7 @@ const styles = StyleSheet.create({
     color: '#FF6152',
     fontWeight: 'bold',
   },
-  activeTabEduText: {
+  activeTabStudyText: {
     color: '#7DC353',
     fontWeight: 'bold',
   },

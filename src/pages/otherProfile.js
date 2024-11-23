@@ -7,28 +7,28 @@ import {
   Pressable,
   ActivityIndicator,
   Dimensions,
-  FlatList,
-  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, {Defs, ClipPath, Circle, Image as SvgImage} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
 import Header2 from '../components/header2';
 import NavBar from '../components/navBar';
+import LineProfile from '../images/lineProfile.svg';
+import LineCalendar from '../images/lineCalendar.svg';
 
 const {width, height} = Dimensions.get('window');
 
 export default function OtherProfile({route}) {
   const navigation = useNavigation();
-  const {memberId} = route.params; // `MainSocial`에서 전달된 userId
+  const {memberId} = route.params; // 전달받은 memberId
   const [userInfo, setUserInfo] = useState(null);
-  const [posts, setPosts] = useState([]); // 게시글 데이터
+  const [userPosts, setUserPosts] = useState([]); // 사용자 게시글 상태
   const [loading, setLoading] = useState(true);
 
-  // 상대방 프로필 가져오기
   const fetchOtherProfile = async () => {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
+
       const response = await fetch(
         `https://mixmix2.store/api/member/mypage/${memberId}`,
         {
@@ -42,7 +42,8 @@ export default function OtherProfile({route}) {
 
       if (response.ok) {
         const data = await response.json();
-        setUserInfo(data.data); // 서버에서 가져온 데이터를 userInfo에 저장
+        setUserInfo(data.data);
+        setUserPosts(data.data.posts || []); // 게시글 데이터가 있다면 추가
         console.log('Other user info:', data.data);
       } else {
         const errorData = await response.json();
@@ -54,33 +55,6 @@ export default function OtherProfile({route}) {
       }
     } catch (error) {
       console.error('Error fetching other profile:', error);
-    }
-  };
-
-  // 상대방 게시글 가져오기
-  const fetchPosts = async () => {
-    try {
-      const accessToken = await AsyncStorage.getItem('accessToken');
-      const response = await fetch(
-        `https://mixmix2.store/api/member/posts/${memberId}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setPosts(data.data || []); // 게시글 데이터 설정
-        console.log('Posts:', data.data);
-      } else {
-        console.error('Failed to fetch posts:', response.status);
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
@@ -88,7 +62,6 @@ export default function OtherProfile({route}) {
 
   useEffect(() => {
     fetchOtherProfile();
-    fetchPosts(); // 프로필과 게시글 데이터 가져오기
   }, []);
 
   if (loading) {
@@ -109,7 +82,7 @@ export default function OtherProfile({route}) {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <Header2 />
         <View style={styles.profileSection}>
           <View style={styles.profileImageContainer}>
@@ -140,35 +113,46 @@ export default function OtherProfile({route}) {
           <Pressable
             style={styles.messageButton}
             onPress={() => {
-              navigation.navigate('Dm', {memberId, memberName: userInfo.name}); // Dm.js로 이동 및 데이터 전달
+              navigation.navigate('Dm', {memberId, memberName: userInfo.name});
             }}>
             <Text style={styles.messageButtonText}>쪽지 보내기</Text>
           </Pressable>
         </View>
 
-        {/* 게시글 섹션 */}
+        {/* 올린 게시글 섹션 */}
         <View style={styles.postsSection}>
-          <Text style={styles.postsTitle}>올린 게시글</Text>
-          {posts.length === 0 ? (
-            <Text style={styles.noPostsText}>게시글이 없습니다.</Text>
-          ) : (
-            <FlatList
-              data={posts}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({item}) => (
-                <View style={styles.postContainer}>
-                  <Image
-                    source={{
-                      uri: item.image || 'https://via.placeholder.com/150',
-                    }}
-                    style={styles.postImage}
-                  />
-                  <Text style={styles.postContent}>{item.contents}</Text>
-                </View>
-              )}
-            />
-          )}
+          <View style={styles.postCategory}>
+            <Text style={[styles.postLabel, {color: '#ff6152'}]}>Social</Text>
+            <Text style={styles.postCount}>{userInfo.socialCount}</Text>
+          </View>
+          <LineProfile />
+          <View style={styles.postCategory}>
+            <Text style={[styles.postLabel, {color: '#ff6152'}]}>Study</Text>
+            <Text style={styles.postCount}>{userInfo.studyCount}</Text>
+          </View>
         </View>
+
+        {/* 캘린더 섹션 */}
+        <View style={styles.calendarSection}>
+          <View style={styles.weekDays}>
+            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
+              <Text key={index} style={styles.weekDay}>
+                {day}
+              </Text>
+            ))}
+          </View>
+          <LineCalendar style={styles.lineCalendarLine} />
+          <View style={styles.calendarDates}>
+            {[...Array(31)].map((_, index) => (
+              <View key={index} style={styles.date}>
+                <Text style={styles.dateText}>{index + 1}</Text>
+                {index < 30 && <Text style={styles.dateSubtext}></Text>}
+              </View>
+            ))}
+          </View>
+        </View>
+        {/* 여백 추가 */}
+        <View style={styles.bottomPadding} />
       </ScrollView>
 
       <View style={styles.navBarContainer}>
@@ -182,6 +166,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+  scrollContent: {
+    paddingBottom: height * 0.1, // 아래 여백 추가
   },
   loadingContainer: {
     flex: 1,
@@ -197,9 +184,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#ff6152',
   },
-  scrollView: {
-    flex: 1,
-  },
   profileSection: {
     alignItems: 'center',
     padding: 20,
@@ -210,16 +194,18 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#000',
   },
   profileSchool: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    marginTop: 8,
+    color: '#000',
   },
   profileIntro: {
     fontSize: 14,
     color: '#333',
     textAlign: 'center',
-    marginTop: 10,
+    marginTop: 12,
   },
   messageButton: {
     backgroundColor: '#fff7f6',
@@ -238,33 +224,69 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard',
     fontSize: 14,
     fontWeight: '600',
-    lineHeight: 18,
     textAlign: 'center',
   },
   postsSection: {
-    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    paddingVertical: height * 0.02,
+    backgroundColor: '#ffffff',
   },
-  postsTitle: {
-    fontSize: 18,
+  postCategory: {
+    alignItems: 'center',
+  },
+  postLabel: {
+    fontSize: width * 0.035,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: height * 0.01,
   },
-  noPostsText: {
-    fontSize: 14,
-    color: '#888',
+  postCount: {
+    fontSize: width * 0.05,
+    fontFamily: 'Pretendard-SemiBold',
+    color: '#000',
   },
-  postContainer: {
-    marginBottom: 20,
+  calendarSection: {
+    marginHorizontal: width * 0.04,
+    borderRadius: width * 0.025,
+    padding: height * 0.02,
+    backgroundColor: '#222222',
   },
-  postImage: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 10,
+  weekDays: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginBottom: height * 0.01,
   },
-  postContent: {
-    fontSize: 14,
-    color: '#333',
+  weekDay: {
+    fontSize: width * 0.035,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginHorizontal: width * 0.03,
+  },
+  calendarDates: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+  },
+  date: {
+    flex: 1,
+    alignItems: 'center',
+    marginVertical: height * 0.01,
+    flexBasis: '14.28%',
+    maxWidth: '14.28%',
+  },
+  dateText: {
+    fontSize: width * 0.035,
+    fontFamily: 'Pretendard-Medium',
+    color: '#999999',
+  },
+  dateSubtext: {
+    fontSize: width * 0.03,
+    textAlign: 'center',
+    color: '#777',
+  },
+  bottomPadding: {
+    height: height * 0.1,
   },
   navBarContainer: {
     position: 'absolute',

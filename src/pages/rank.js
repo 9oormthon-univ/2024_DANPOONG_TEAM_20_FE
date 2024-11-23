@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.035,
     fontWeight: 'bold',
     marginRight: width * 0.015,
+    color: '#000',
   },
   flagText: {
     fontSize: width * 0.03,
@@ -262,6 +263,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: width * 0.03,
     fontWeight: 'bold',
+    color: '#000',
   },
   scrollContainer: {
     flex: 1,

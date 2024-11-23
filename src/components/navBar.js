@@ -5,6 +5,7 @@ import NavBackground from '../images/navBar_background.svg';
 import HomeIcon from '../images/navBar_home.svg';
 import HomeIconActive from '../images/navBar_home_active.svg';
 import DmIcon from '../images/navBar_dm.svg';
+import DmIconActive from '../images/navBar_dm_active.svg'; // Dm 활성화 아이콘 추가
 import CameraIcon from '../images/navBar_camera.svg';
 import RankIcon from '../images/navBar_rank.svg';
 import RankIconActive from '../images/navBar_rank_active.svg';
@@ -16,11 +17,11 @@ const {width, height} = Dimensions.get('window');
 const tabs = [
   {
     name: 'Home',
-    routes: ['MainSocial', 'MainEdu'],
+    routes: ['MainSocial', 'MainStudy'],
     icon: HomeIcon,
     activeIcon: HomeIconActive,
   },
-  {name: 'Dm', routes: ['Dm'], icon: DmIcon},
+  {name: 'Dm', routes: ['Dm'], icon: DmIcon, activeIcon: DmIconActive}, // Dm 활성화 아이콘 추가
   {name: 'Camera', routes: ['Camera'], icon: CameraIcon},
   {name: 'Rank', routes: ['Rank'], icon: RankIcon, activeIcon: RankIconActive},
   {
