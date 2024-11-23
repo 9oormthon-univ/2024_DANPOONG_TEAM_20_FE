@@ -18,10 +18,26 @@ import OptionIcon from '../images/option.svg';
 
 const {width, height} = Dimensions.get('window');
 
+// 날짜 형식 함수
+const formatDate = dateString => {
+  const date = new Date(dateString);
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 월을 2자리로 맞춤
+  const day = String(date.getDate()).padStart(2, '0'); // 일을 2자리로 맞춤
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0'); // 분을 2자리로 맞춤
+  const ampm = hours >= 12 ? 'PM' : 'AM'; // AM/PM 결정
+
+  // 12시간제로 변환
+  hours = hours % 12;
+  hours = hours ? String(hours).padStart(2, '0') : '12'; // 0시를 12로 표시
+
+  return `${month}.${day} ${hours}:${minutes}${ampm}`;
+};
+
 const MainSocial = ({navigation, route}) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
-  const [posts, setPosts] = useState([]); // API에서 가져온 게시글
+  const [posts, setPosts] = useState([]);
   const hashtags = ['#음식', '#K-POP', '#핫플', '#질문', '#구인'];
 
   useFocusEffect(
@@ -65,7 +81,15 @@ const MainSocial = ({navigation, route}) => {
 
         if (response.ok) {
           const data = await response.json();
-          setPosts(data.data.feedListResDto || []);
+          console.log('A:', data.data.feedListResDto);
+
+          const feedDataWithProfiles = data.data.feedListResDto.map(feed => ({
+            ...feed,
+            memberImage: feed.memberImage || 'https://via.placeholder.com/40',
+            memberName: feed.memberName || '익명',
+          }));
+
+          setPosts(feedDataWithProfiles || []);
         } else {
           console.error('API 호출 실패:', response.status);
         }
@@ -114,82 +138,76 @@ const MainSocial = ({navigation, route}) => {
         </ScrollView>
       </View>
 
-      <FlatList
-        data={posts}
-        ListEmptyComponent={
+      <ScrollView contentContainerStyle={styles.postsContainer}>
+        {posts.length === 0 ? (
           <Text style={styles.emptyMessage}>게시글이 없습니다.</Text>
-        }
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <View style={styles.postContainer}>
-            <View style={styles.profileContainer}>
-              <View style={styles.profileInfo}>
-                {/* 프로필 이미지 클릭 시 이동 */}
-                <Pressable
-                  onPress={
-                    () =>
-                      navigation.navigate('OtherProfile', {userId: item.userId}) // userId를 전달
-                  }>
-                  <Image
-                    source={{
-                      uri:
-                        item.profileImage || 'https://via.placeholder.com/40',
-                    }}
-                    style={styles.profileImage}
-                  />
-                </Pressable>
-
-                <View style={styles.profileText}>
-                  {/* 이름 클릭 시 이동 */}
+        ) : (
+          posts.map(item => (
+            <View key={item.id} style={styles.postContainer}>
+              <View style={styles.profileContainer}>
+                <View style={styles.profileInfo}>
                   <Pressable
-                    onPress={
-                      () =>
+                    onPress={() =>
+                      navigation.navigate('OtherProfile', {
+                        memberId: item.memberId,
+                      })
+                    }>
+                    <Image
+                      source={{
+                        uri: item.memberImage,
+                      }}
+                      style={styles.profileImage}
+                    />
+                  </Pressable>
+
+                  <View style={styles.profileText}>
+                    <Pressable
+                      onPress={() =>
                         navigation.navigate('OtherProfile', {
                           userId: item.userId,
-                        }) // userId를 전달
-                    }>
-                    <Text style={styles.name}>
-                      {item.name || '익명'}{' '}
-                      <Text style={styles.flag}>{item.flag || ''}</Text>
+                        })
+                      }>
+                      <Text style={styles.name}>
+                        {item.memberName || '익명'}{' '}
+                        <Text style={styles.flag}>{item.flag || ''}</Text>
+                      </Text>
+                    </Pressable>
+                    <Text style={styles.time}>
+                      {item.createdAt ? formatDate(item.createdAt) : '방금 전'}
                     </Text>
-                  </Pressable>
-                  <Text style={styles.time}>{item.createdAt || '방금 전'}</Text>
+                  </View>
                 </View>
               </View>
 
-              <Pressable style={styles.optionButton}>
-                <OptionIcon width={width * 0.05} height={width * 0.05} />
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('Feed', {feedId: item.feedId})
+                }>
+                <View style={styles.contentImageContainer}>
+                  <Image
+                    source={{uri: item.feedImage}}
+                    style={styles.contentImage}
+                  />
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('Feed', {feedId: item.feedId})
+                }>
+                <Text style={styles.postText}>{item.contents}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('Feed', {feedId: item.feedId})
+                }>
+                <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
               </Pressable>
             </View>
-
-            <Pressable
-              onPress={() =>
-                navigation.navigate('Feed', {feedId: item.feedId})
-              }>
-              <View style={styles.contentImageContainer}>
-                <Image
-                  source={{uri: item.feedImage}}
-                  style={styles.contentImage}
-                />
-              </View>
-            </Pressable>
-
-            <Pressable
-              onPress={() =>
-                navigation.navigate('Feed', {feedId: item.feedId})
-              }>
-              <Text style={styles.postText}>{item.contents}</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() =>
-                navigation.navigate('Feed', {feedId: item.feedId})
-              }>
-              <Text style={styles.commentPlaceholder}>댓글 달기...</Text>
-            </Pressable>
-          </View>
+          ))
         )}
-      />
+      </ScrollView>
 
       <NavBar navigation={navigation} />
     </SafeAreaView>

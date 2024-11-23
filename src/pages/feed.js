@@ -22,6 +22,42 @@ const Feed = ({route}) => {
   const [comments, setComments] = useState([]); // 댓글 리스트
   const [commentText, setCommentText] = useState(''); // 댓글 입력 값
 
+  // 댓글 조회
+  const fetchComments = async () => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
+    if (!accessToken) {
+      Alert.alert('오류', '토큰이 없습니다.');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://mixmix2.store/api/comments/${feedId}?page=0&size=10`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data.data.commentListResDtos || []); // 댓글 리스트 설정
+      } else {
+        const errorData = await response.json();
+        Alert.alert(
+          '오류',
+          errorData.message || '댓글을 가져오는 데 실패했습니다.',
+        );
+        console.log(errorData);
+      }
+    } catch (error) {
+      Alert.alert('오류', '네트워크 오류가 발생했습니다.');
+    }
+  };
+
+  // 피드 상세 데이터 조회
   useEffect(() => {
     const fetchFeedDetails = async () => {
       const accessToken = await AsyncStorage.getItem('accessToken');
@@ -45,7 +81,6 @@ const Feed = ({route}) => {
         if (response.ok) {
           const data = await response.json();
           setFeedData(data.data); // 피드 데이터 설정
-          setComments(data.data.comments || []); // 댓글 데이터 설정
         } else {
           const errorData = await response.json();
           Alert.alert(
@@ -59,7 +94,10 @@ const Feed = ({route}) => {
     };
 
     fetchFeedDetails();
+    fetchComments(); // 댓글 조회 호출
   }, [feedId]);
+
+  // 댓글 등록
   const handleSendComment = async () => {
     if (!commentText.trim()) {
       Alert.alert('오류', '댓글 내용을 입력해주세요.');
@@ -67,21 +105,16 @@ const Feed = ({route}) => {
     }
 
     const accessToken = await AsyncStorage.getItem('accessToken');
-
     if (!accessToken) {
       Alert.alert('오류', '토큰이 없습니다.');
       return;
     }
 
     try {
-      console.log('Access Token:', accessToken);
-
-      // 요청 바디 로그 출력
       const requestBody = {
         contents: commentText,
         feedId: feedId,
       };
-      console.log('Request Body:', JSON.stringify(requestBody, null, 2)); // JSON으로 보기 좋게 출력
 
       const response = await fetch('https://mixmix2.store/api/comments', {
         method: 'POST',
@@ -92,101 +125,87 @@ const Feed = ({route}) => {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Response Status:', response.status);
-
-      // 응답 처리
-      const responseData = await response.json(); // 응답을 JSON으로 읽음
-      console.log('Response Data:', responseData);
-
       if (response.ok) {
-        console.log('New Comment:', responseData);
-        setComments(prevComments => [responseData.data, ...prevComments]); // 댓글 리스트에 새 댓글 추가
         setCommentText(''); // 입력 필드 초기화
+        fetchComments(); // 댓글 리스트 다시 조회
       } else {
+        const responseData = await response.json();
         Alert.alert(
           '오류',
           responseData.message || '댓글 작성에 실패했습니다.',
         );
       }
     } catch (error) {
-      console.error('Network Error:', error);
       Alert.alert('오류', '네트워크 오류가 발생했습니다.');
     }
   };
-
-  // 피드 콘텐츠와 댓글을 합친 데이터
-  const data = feedData ? [feedData, ...comments] : [];
 
   return (
     <SafeAreaView style={styles.container}>
       <Header2 />
 
       <FlatList
-        data={data}
-        keyExtractor={item => item.feedId?.toString() || item.id?.toString()}
-        contentContainerStyle={{paddingBottom: 80}}
-        renderItem={({item}) => {
-          if (item.feedId) {
-            return (
-              <View style={styles.feedContainer}>
-                <View style={styles.profileContainer}>
-                  <View style={styles.profileInfo}>
-                    <Image
-                      source={{
-                        uri:
-                          item.profileImage || 'https://via.placeholder.com/40',
-                      }}
-                      style={styles.profileImage}
-                    />
-                    <View>
-                      <Text style={styles.name}>
-                        {item.name || '익명'}{' '}
-                        <Text style={styles.flag}>{item.flag || ''}</Text>
-                      </Text>
-                      <Text style={styles.time}>
-                        {new Date(item.createdAt).toLocaleString() || '방금 전'}
-                      </Text>
-                    </View>
+        data={comments}
+        keyExtractor={item =>
+          item.commentWriterId?.toString() || item.id?.toString()
+        }
+        ListHeaderComponent={
+          feedData && (
+            <View style={styles.feedContainer}>
+              <View style={styles.profileContainer}>
+                <View style={styles.profileInfo}>
+                  <Image
+                    source={{
+                      uri:
+                        feedData.memberImage ||
+                        'https://via.placeholder.com/40',
+                    }}
+                    style={styles.profileImage}
+                  />
+                  <View>
+                    <Text style={styles.name}>
+                      {feedData.memberName || '익명'}
+                    </Text>
+                    <Text style={styles.time}>
+                      {new Date(feedData.createdAt).toLocaleString() ||
+                        '방금 전'}
+                    </Text>
                   </View>
-                  <Pressable style={styles.optionButton}>
-                    <OptionIcon width={18} height={18} />
-                  </Pressable>
                 </View>
-                <Image
-                  source={{
-                    uri: item.feedImage || 'https://via.placeholder.com/300',
-                  }}
-                  style={styles.contentImage}
-                />
-                <Text style={styles.feedText}>{item.contents}</Text>
-              </View>
-            );
-          } else {
-            return (
-              <View style={styles.commentContainer}>
-                <Image
-                  source={{
-                    uri: item.profileImage || 'https://via.placeholder.com/40',
-                  }}
-                  style={styles.commentProfileImage}
-                />
-                <View style={styles.commentContent}>
-                  <Text style={styles.commentName}>
-                    {item.name || '익명'}{' '}
-                    <Text style={styles.flag}>{item.flag || ''}</Text>
-                  </Text>
-                  <Text style={styles.commentText}>{item.contents}</Text>
-                  <Text style={styles.commentTime}>
-                    {new Date(item.createdAt).toLocaleString() || '방금 전'}
-                  </Text>
-                </View>
-                <Pressable style={styles.sendDmButton}>
-                  <SendDmIcon width={18} height={18} />
+                <Pressable style={styles.optionButton}>
+                  <OptionIcon width={18} height={18} />
                 </Pressable>
               </View>
-            );
-          }
-        }}
+              <Image
+                source={{
+                  uri: feedData.feedImage || 'https://via.placeholder.com/300',
+                }}
+                style={styles.contentImage}
+              />
+              <Text style={styles.feedText}>{feedData.contents}</Text>
+            </View>
+          )
+        }
+        renderItem={({item}) => (
+          <View style={styles.commentContainer}>
+            <Image
+              source={{
+                uri: item.picture || 'https://via.placeholder.com/40',
+              }}
+              style={styles.commentProfileImage}
+            />
+            <View style={styles.commentContent}>
+              <Text style={styles.commentName}>{item.nickname || '익명'}</Text>
+              <Text style={styles.commentText}>{item.contents}</Text>
+              <Text style={styles.commentTime}>
+                {new Date(item.createdAt).toLocaleString() || '방금 전'}
+              </Text>
+            </View>
+            <Pressable style={styles.sendDmButton}>
+              <SendDmIcon width={18} height={18} />
+            </Pressable>
+          </View>
+        )}
       />
 
       <View style={styles.commentInputContainer}>
@@ -206,7 +225,6 @@ const Feed = ({route}) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -235,12 +253,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 14,
     fontWeight: 'bold',
-  },
-  flag: {
-    fontSize: 14,
+    fontFamily: 'Pretendard-Medium',
   },
   time: {
     fontSize: 12,
+    fontFamily: 'Pretendard-Regular',
     color: '#888',
   },
   optionButton: {

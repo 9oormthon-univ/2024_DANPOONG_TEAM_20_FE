@@ -7,111 +7,89 @@ import {
   Pressable,
   ActivityIndicator,
   Dimensions,
+  FlatList,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Svg, {
-  Defs,
-  ClipPath,
-  Path,
-  Circle,
-  Image as SvgImage,
-} from 'react-native-svg';
+import Svg, {Defs, ClipPath, Circle, Image as SvgImage} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
-import StreakIcon from '../images/Fire_fill.svg';
-import BadgeIcon from '../images/badge1.svg';
 import Header2 from '../components/header2';
-import TodayQuizIcon from '../images/todayQuiz_icon.svg';
-import LineProfile from '../images/lineProfile.svg';
-import LineCalendar from '../images/lineCalendar.svg';
-import ProfileEditIcon from '../images/profileEditIcon.svg';
-import LineUnderCal from '../images/lineUnderCal.svg';
 import NavBar from '../components/navBar';
-import ProfileEdit from './profileEdit';
 
 const {width, height} = Dimensions.get('window');
 
-export default function MyProfile() {
+export default function OtherProfile({route}) {
   const navigation = useNavigation();
+  const {memberId} = route.params; // `MainSocial`에서 전달된 userId
   const [userInfo, setUserInfo] = useState(null);
+  const [posts, setPosts] = useState([]); // 게시글 데이터
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState(null); // 서버에서 가져온 데이터를 저장
 
-  // 서버에서 데이터 가져오기
-  const profileDetail = async () => {
+  // 상대방 프로필 가져오기
+  const fetchOtherProfile = async () => {
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
-      const response = await fetch('https://mixmix2.store/api/member/mypage', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
+      const response = await fetch(
+        `https://mixmix2.store/api/member/mypage/${memberId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setUserData(data); // 가져온 데이터를 상태에 저장
-        console.log('userdata:', data);
+        setUserInfo(data.data); // 서버에서 가져온 데이터를 userInfo에 저장
+        console.log('Other user info:', data.data);
       } else {
-        console.error('데이터 요청 실패', response.status);
+        const errorData = await response.json();
+        console.error(
+          'Failed to fetch other profile:',
+          response.status,
+          errorData,
+        );
       }
     } catch (error) {
-      console.error('프로필 데이터 불러오기 오류:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching other profile:', error);
     }
   };
 
-  useEffect(() => {
-    profileDetail();
-  }, []);
-
-  useEffect(() => {
-    loadUserInfo();
-  }, []);
-  const handleProfileEdit = () => {
-    setIsEditing(true); // 프로필 편집 화면으로 전환
-  };
-
-  // 사용자 정보 불러오기
-  const loadUserInfo = async () => {
+  // 상대방 게시글 가져오기
+  const fetchPosts = async () => {
     try {
-      const storedUserInfo = await AsyncStorage.getItem('userInfo');
-      console.log('userinfo:', userInfo);
-      if (storedUserInfo) {
-        setUserInfo(JSON.parse(storedUserInfo));
-      }
-    } catch (error) {
-      console.error('사용자 정보 가져오기 오류:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 로그아웃 핸들러
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('accessToken');
-      await AsyncStorage.removeItem('refreshToken');
-      await AsyncStorage.removeItem('userInfo');
+      const accessToken = await AsyncStorage.getItem('accessToken');
       const response = await fetch(
-        'https://mixmix2.store/api/notifications/disconnect',
+        `https://mixmix2.store/api/member/posts/${memberId}`,
         {
-          method: 'DELETE',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
       );
-      const responseBody = await response.json();
-      console.log('서버 응답:', responseBody);
-      navigation.replace('Login');
+
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data.data || []); // 게시글 데이터 설정
+        console.log('Posts:', data.data);
+      } else {
+        console.error('Failed to fetch posts:', response.status);
+      }
     } catch (error) {
-      console.error('로그아웃 오류:', error);
+      console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (isEditing) {
-    return <ProfileEdit />; // ProfileEdit 컴포넌트 렌더링
-  }
+  useEffect(() => {
+    fetchOtherProfile();
+    fetchPosts(); // 프로필과 게시글 데이터 가져오기
+  }, []);
 
   if (loading) {
     return (
@@ -121,105 +99,78 @@ export default function MyProfile() {
     );
   }
 
+  if (!userInfo) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>프로필 정보를 불러올 수 없습니다.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* 스크롤 가능한 영역 */}
       <ScrollView style={styles.scrollView}>
-        {/* 헤더 */}
         <Header2 />
-
-        {/* 프로필 섹션 */}
         <View style={styles.profileSection}>
-          <View style={styles.streak}>
-            <StreakIcon style={styles.streakIcon} />
-            <Text style={styles.streakNumber}>{userInfo.streak}</Text>
-          </View>
-          <Text style={styles.universityName}>{userInfo.school}</Text>
-
-          {/* 프로필 이미지 */}
           <View style={styles.profileImageContainer}>
             <Svg width={144} height={144}>
               <Defs>
-                <ClipPath id="mixmix">
+                <ClipPath id="profileClip">
                   <Circle cx="72" cy="72" r="72" />
                 </ClipPath>
               </Defs>
               <SvgImage
-                href={userInfo?.picture || 'https://via.placeholder.com/120'}
+                href={userInfo.picture || 'https://via.placeholder.com/144'}
                 width="100%"
                 height="100%"
-                clipPath="url(#mixmix)"
+                clipPath="url(#profileClip)"
                 preserveAspectRatio="xMidYMid slice"
               />
             </Svg>
-            <BadgeIcon style={styles.badge} />
-            <Pressable onPress={handleProfileEdit}>
-              <ProfileEditIcon style={styles.editIcon} />
-            </Pressable>
           </View>
-
-          <View style={styles.profileNameContainer}>
-            <Text style={styles.profileName}>
-              {userInfo?.nickname || '사용자'}
-            </Text>
-            <Text style={styles.profileNation}>
-              · {userInfo?.nation || '국가 🇰🇷'}
-            </Text>
-          </View>
-          <Text style={styles.message}>{userInfo.introduction}</Text>
-        </View>
-
-        {/* 올린 게시글 섹션 */}
-        <View style={styles.postsSection}>
-          <View style={styles.postCategory}>
-            <Text style={[styles.postLabel, {color: '#ff6152'}]}>Social</Text>
-            <Text style={styles.postCount}>{userInfo.SocialCount}</Text>
-          </View>
-          <LineProfile />
-          <View style={styles.postCategory}>
-            <Text style={[styles.postLabel, {color: '#ff6152'}]}>Study</Text>
-            <Text style={styles.postCount}>{userInfo.studyCount}</Text>
-          </View>
-        </View>
-
-        {/* 캘린더 섹션 */}
-        <View style={styles.calendarSection}>
-          <View style={styles.weekDays}>
-            {['일', '월', '화', '수', '목', '금', '토'].map((day, index) => (
-              <Text key={index} style={styles.weekDay}>
-                {day}
-              </Text>
-            ))}
-          </View>
-          <LineCalendar style={styles.lineCalendarLine} />
-          <View style={styles.calendarDates}>
-            {[...Array(31)].map((_, index) => (
-              <View key={index} style={styles.date}>
-                <Text style={styles.dateText}>{index + 1}</Text>
-                {index < 30 && (
-                  <Text style={styles.dateSubtext}>더미 텍스트</Text>
-                )}
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <LineUnderCal style={styles.lineUnderCal} />
-
-        {/* 로그아웃 버튼 */}
-        <View style={styles.accountContainer}>
-          <Text style={styles.accountTitle}>내 계정</Text>
-          <Text style={styles.accountEmail}>
-            {userInfo?.email || '이메일 정보 없음'}
+          <Text style={styles.profileName}>{userInfo.name || '이름 없음'}</Text>
+          <Text style={styles.profileSchool}>
+            {userInfo.school || '학교 정보 없음'}
+          </Text>
+          <Text style={styles.profileIntro}>
+            {userInfo.introduction || '자기소개가 없습니다.'}
           </Text>
 
-          <Pressable style={styles.logoutContainer} onPress={handleLogout}>
-            <Text style={styles.logoutText}>로그아웃</Text>
+          {/* "쪽지 보내기" 버튼 */}
+          <Pressable
+            style={styles.messageButton}
+            onPress={() => {
+              navigation.navigate('Dm', {memberId, memberName: userInfo.name}); // Dm.js로 이동 및 데이터 전달
+            }}>
+            <Text style={styles.messageButtonText}>쪽지 보내기</Text>
           </Pressable>
+        </View>
+
+        {/* 게시글 섹션 */}
+        <View style={styles.postsSection}>
+          <Text style={styles.postsTitle}>올린 게시글</Text>
+          {posts.length === 0 ? (
+            <Text style={styles.noPostsText}>게시글이 없습니다.</Text>
+          ) : (
+            <FlatList
+              data={posts}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({item}) => (
+                <View style={styles.postContainer}>
+                  <Image
+                    source={{
+                      uri: item.image || 'https://via.placeholder.com/150',
+                    }}
+                    style={styles.postImage}
+                  />
+                  <Text style={styles.postContent}>{item.contents}</Text>
+                </View>
+              )}
+            />
+          )}
         </View>
       </ScrollView>
 
-      {/* 하단 네비게이션 */}
       <View style={styles.navBarContainer}>
         <NavBar navigation={navigation} />
       </View>
@@ -232,228 +183,92 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
   },
-  header: {
-    flexDirection: 'row',
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: height * 0.02,
-    backgroundColor: '#f9f9f9',
   },
-  headerText: {
-    fontSize: width * 0.04,
-    textAlign: 'center',
-    fontFamily: 'Pretendard-SemiBold',
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  headerIcon: {
-    width: width * 0.06,
-    height: width * 0.06,
+  errorText: {
+    fontSize: 16,
+    color: '#ff6152',
+  },
+  scrollView: {
+    flex: 1,
   },
   profileSection: {
     alignItems: 'center',
-    paddingVertical: height * 0.03,
-    backgroundColor: '#fff',
-  },
-  universityName: {
-    fontSize: width * 0.03,
-    fontFamily: 'Pretendard-Regular',
-    color: '#000',
-  },
-  streak: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    position: 'absolute',
-    right: width * 0.04,
-    borderRadius: width * 0.06,
-    borderColor: '#d9d9d9',
-    borderWidth: 1,
-    paddingVertical: height * 0.005,
-    marginTop: height * 0.01,
-  },
-  streakNumber: {
-    fontSize: width * 0.03,
-    fontFamily: 'Pretendard-Regular',
-    color: '#000',
-    marginRight: width * 0.02,
-  },
-  streakIcon: {
-    width: width * 0.05,
-    height: width * 0.05,
-    marginLeft: width * 0.01,
+    padding: 20,
   },
   profileImageContainer: {
-    position: 'relative',
-    width: width * 0.4,
-    height: height * 0.2,
-    marginTop: height * 0.02,
-  },
-  badge: {
-    position: 'absolute',
-    marginTop: height * -0.01,
-    left: width * 0.02,
-  },
-  editIcon: {
-    position: 'absolute',
-    right: 0,
-    bottom: height * 0.02,
-    marginRight: width * 0.02,
-  },
-  profileNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: height * 0.07,
+    marginBottom: 20,
   },
   profileName: {
-    fontSize: width * 0.04,
-    fontFamily: 'Pretendard-SemiBold',
-    color: '#000',
-  },
-  profileNation: {
-    fontSize: width * 0.03,
-    fontFamily: 'Pretendard-SemiBold',
-    marginLeft: width * 0.01,
-    color: '#000',
-  },
-  message: {
-    fontSize: width * 0.035,
-    fontFamily: 'Pretendard-Regular',
-    marginTop: height * 0.005,
-    color: '#333',
-  },
-  postsSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingVertical: height * 0.02,
-    backgroundColor: '#ffffff',
-  },
-  postCategory: {
-    alignItems: 'center',
-  },
-  line: {
-    width: width * 0.2,
-    height: height * 0.002,
-  },
-  postLabel: {
-    fontSize: width * 0.035,
-    fontFamily: 'Pretendard-Medium',
-    marginBottom: height * 0.01,
-  },
-  postCount: {
-    fontSize: width * 0.05,
-    fontFamily: 'Pretendard-SemiBold',
-    color: '#000',
-  },
-  quizSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: height * 0.02,
-    borderColor: '#d9d9d9',
-    borderRadius: width * 0.02,
-    borderWidth: 0.5,
-    margin: height * 0.02,
-    backgroundColor: '#fff',
-  },
-  quizSectionPressable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  quizIcon: {
-    marginRight: width * 0.03,
-  },
-  textGroup: {
-    flexDirection: 'column',
-  },
-  quizTitle: {
-    fontSize: width * 0.04,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
   },
-  quizSubtitle: {
-    fontSize: width * 0.035,
+  profileSchool: {
+    fontSize: 16,
     color: '#666',
   },
-  calendarSection: {
-    marginHorizontal: width * 0.04,
-    borderRadius: width * 0.025,
-    padding: height * 0.02,
-    backgroundColor: '#222222',
-  },
-  weekDays: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginBottom: height * 0.01,
-  },
-  weekDay: {
-    fontSize: width * 0.035,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginHorizontal: width * 0.03,
-  },
-  calendarDates: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  date: {
-    flex: 1,
-    alignItems: 'center',
-    marginVertical: height * 0.01,
-    flexBasis: '14.28%',
-    maxWidth: '14.28%',
-  },
-  dateText: {
-    fontSize: width * 0.035,
-    fontFamily: 'Pretendard-Medium',
-    color: '#999999',
-  },
-  dateSubtext: {
-    fontSize: width * 0.03,
+  profileIntro: {
+    fontSize: 14,
+    color: '#333',
     textAlign: 'center',
-    color: '#777',
+    marginTop: 10,
   },
-  accountContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    // flexDirection: "column",
-  },
-  accountTitle: {
-    fontSize: 12,
-    marginBottom: 5,
-    color: '#000',
-  },
-  accountEmail: {
-    fontSize: 12,
-    marginBottom: 10,
-    color: '#000',
-  },
-  logoutText: {
-    // textAlign: "right",
-    // marginTop: -20,
-    fontSize: 12,
-    fontFamily: 'Pretendard-Medium',
+  messageButton: {
+    backgroundColor: '#fff7f6',
     borderWidth: 1,
-    borderRadius: 32,
-    paddingHorizontal: 4,
-    paddingVertical: 3,
-    borderColor: '#767676',
-  },
-  logoutContainer: {
-    position: 'absolute',
-    right: 0,
-    marginTop: 20,
-  },
-  lineCalendarLine: {
-    alignItems: 'center',
-    marginTop: 40,
-    marginLeft: 4,
+    borderColor: '#ec5445',
+    borderRadius: 15,
+    height: 36,
+    width: 106,
     justifyContent: 'center',
-    position: 'absolute',
+    alignItems: 'center',
+    marginTop: 20,
+    alignSelf: 'center',
   },
-  lineUnderCal: {
-    marginVertical: 26,
+  messageButtonText: {
+    color: '#ec5445',
+    fontFamily: 'Pretendard',
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  postsSection: {
+    padding: 20,
+  },
+  postsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  noPostsText: {
+    fontSize: 14,
+    color: '#888',
+  },
+  postContainer: {
+    marginBottom: 20,
+  },
+  postImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  postContent: {
+    fontSize: 14,
+    color: '#333',
+  },
+  navBarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
   },
 });

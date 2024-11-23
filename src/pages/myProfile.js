@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   },
   quizTitle: {
     fontSize: width * 0.04,
-    fontWeight: 'bold',
+    fontFamily: 'Pretendard-SemiBold',
     color: '#000',
   },
   quizSubtitle: {
