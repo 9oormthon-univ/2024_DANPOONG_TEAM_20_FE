@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   feedText: {
     fontSize: 14,
     color: '#000',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   commentContainer: {
     flexDirection: 'row',
@@ -291,10 +291,11 @@ const styles = StyleSheet.create({
   commentName: {
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#000',
   },
   commentText: {
     fontSize: 14,
-    color: '#333',
+    color: '#000',
     marginBottom: 4,
   },
   commentTime: {

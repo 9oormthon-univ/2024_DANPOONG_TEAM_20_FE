@@ -18,7 +18,7 @@ const Dm = ({navigation}) => {
     {
       id: 1,
       memberImage: require('../images/dummy_profile1.jpg'),
-      name: 'julie 🇩🇪',
+      name: 'jamie 🇩🇪',
       message: '뭐해?',
       time: '3분 전',
       unreadNotification: 2,
@@ -34,7 +34,7 @@ const Dm = ({navigation}) => {
     {
       id: 3,
       memberImage: require('../images/dummy_profile3.jpg'),
-      name: 'sihyun',
+      name: 'sihyun 🇫🇷',
       message: '응 내일 봐!',
       time: '1시간 전',
       unreadNotification: 2,
@@ -42,7 +42,7 @@ const Dm = ({navigation}) => {
     {
       id: 4,
       memberImage: require('../images/dummy_profile4.jpg'),
-      name: 'kibbeum',
+      name: 'kibbeum 🇰🇷',
       message: '조심히 들어가',
       time: '4시간 전',
       unreadNotification: 0,
@@ -58,7 +58,7 @@ const Dm = ({navigation}) => {
     {
       id: 6,
       memberImage: require('../images/dummy_profile2.jpg'),
-      name: 'sanas',
+      name: 'sanas 🇫🇷',
       message: '재밌겠다',
       time: '6시간 전',
       unreadNotification: 0,

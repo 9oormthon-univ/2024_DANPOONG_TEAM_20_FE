@@ -91,7 +91,7 @@ const DmChat = ({navigation}) => {
             source={require('../images/dummy_profile1.jpg')}
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>jamin</Text>
+          <Text style={styles.profileName}>jamie</Text>
         </View>
       </View>
 

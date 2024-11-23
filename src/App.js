@@ -15,6 +15,7 @@ import Upload from './pages/upload';
 import Quiz from './pages/quiz';
 import OtherProfile from './pages/otherProfile';
 import DmChat from './pages/dmChat';
+import ProfileInfo from './pages/profileInfo';
 
 const Stack = createStackNavigator();
 
@@ -62,6 +63,11 @@ const App = () => {
         <Stack.Screen
           name="OtherProfile"
           component={OtherProfile}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="ProfileInfo"
+          component={ProfileInfo}
           options={{headerShown: false}}
         />
         <Stack.Screen name="Dm" component={Dm} options={{headerShown: false}} />
