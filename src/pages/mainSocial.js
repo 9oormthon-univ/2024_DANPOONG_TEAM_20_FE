@@ -54,7 +54,7 @@ const MainSocial = ({navigation, route}) => {
 
       try {
         const response = await fetch(
-          'https://mixmix2.store/api/feed/all?keyword=SOCIAL&nationality=bye&page=0&size=10',
+          'https://mixmix2.store/api/feed/all?keyword=SOCIAL&nationality=kr&page=0&size=10',
           {
             method: 'GET',
             headers: {
@@ -124,20 +124,39 @@ const MainSocial = ({navigation, route}) => {
           <View style={styles.postContainer}>
             <View style={styles.profileContainer}>
               <View style={styles.profileInfo}>
-                <Image
-                  source={{
-                    uri: item.profileImage || 'https://via.placeholder.com/40',
-                  }}
-                  style={styles.profileImage}
-                />
+                {/* 프로필 이미지 클릭 시 이동 */}
+                <Pressable
+                  onPress={
+                    () =>
+                      navigation.navigate('OtherProfile', {userId: item.userId}) // userId를 전달
+                  }>
+                  <Image
+                    source={{
+                      uri:
+                        item.profileImage || 'https://via.placeholder.com/40',
+                    }}
+                    style={styles.profileImage}
+                  />
+                </Pressable>
+
                 <View style={styles.profileText}>
-                  <Text style={styles.name}>
-                    {item.name || '익명'}{' '}
-                    <Text style={styles.flag}>{item.flag || ''}</Text>
-                  </Text>
+                  {/* 이름 클릭 시 이동 */}
+                  <Pressable
+                    onPress={
+                      () =>
+                        navigation.navigate('OtherProfile', {
+                          userId: item.userId,
+                        }) // userId를 전달
+                    }>
+                    <Text style={styles.name}>
+                      {item.name || '익명'}{' '}
+                      <Text style={styles.flag}>{item.flag || ''}</Text>
+                    </Text>
+                  </Pressable>
                   <Text style={styles.time}>{item.createdAt || '방금 전'}</Text>
                 </View>
               </View>
+
               <Pressable style={styles.optionButton}>
                 <OptionIcon width={width * 0.05} height={width * 0.05} />
               </Pressable>

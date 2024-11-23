@@ -13,6 +13,7 @@ import Login from './pages/login';
 import Feed from './pages/feed';
 import Upload from './pages/upload';
 import Quiz from './pages/quiz';
+import OtherProfile from './pages/otherProfile';
 
 const Stack = createStackNavigator();
 
@@ -58,10 +59,16 @@ const App = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
-          name="Dm"
-          component={Dm}
-          options={{title: 'Direct Messages'}}
+          name="OtherProfile"
+          component={OtherProfile}
+          options={{headerShown: false}}
         />
+        <Stack.Screen name="Dm" component={Dm} options={{headerShown: false}} />
+        {/* <Stack.Screen
+          name="DmChat"
+          component={DmChat}
+          options={{headerShown: false}}
+        /> */}
         <Stack.Screen
           name="Camera"
           component={Camera}

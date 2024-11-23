@@ -79,7 +79,7 @@ const Upload = ({route, navigation}) => {
     );
 
     // 파일 확장자 동적 처리
-    const fileType = 'jpeg'; // 강제 설정
+    const fileType = 'jpeg';
     formData.append('feedImage', {
       uri: `file://${photo.path}`, // 파일 경로
       name: `photo.${fileType}`, // 파일 이름
@@ -88,7 +88,6 @@ const Upload = ({route, navigation}) => {
 
     try {
       const accessToken = await AsyncStorage.getItem('accessToken');
-      console.log('Access Token:', accessToken); // 엑세스 토큰 로그 출력
       const response = await fetch('https://mixmix2.store/api/feed', {
         method: 'POST',
         headers: {

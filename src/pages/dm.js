@@ -1,112 +1,301 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TextInput, Pressable } from "react-native";
-import { initializeWebSocket, sendMessage } from "../utils/websocket";
-
-const Dm = ({ route }) => {
-  const { recipientId, recipientName } = route.params; // 카카오 사용자 ID 사용
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// WebSocket 연결 및 메시지 수신 함수
+const useWebSocket = roomId => {
   const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState("");
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // WebSocket 초기화
-    const ws = initializeWebSocket("YourKakaoUserId"); // 자신의 카카오 사용자 ID
-
-    ws.onmessage = (event) => {
-      const receivedMessage = JSON.parse(event.data);
-      setMessages((prevMessages) => [...prevMessages, receivedMessage]);
-    };
-
-    // 기존 메시지 불러오기
-    fetch(`https://mixmix2.store/api/chat-rooms?recipientId=${recipientId}`)
-      .then((res) => res.json())
-      .then((data) => setMessages(data))
-      .catch((err) => console.error("메시지 로드 오류:", err));
-
-    return () => ws.close(); // 컴포넌트 언마운트 시 WebSocket 닫기
-  }, []);
-
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      const newMessage = {
-        sender: "YourKakaoUserId", // 현재 사용자 카카오 ID
-        recipient: recipientId, // 상대방 카카오 ID
-        content: messageInput,
-        timestamp: new Date().toISOString(),
+    if (roomId) {
+      const socketInstance = new WebSocket(
+        `wss://mixmix2.store/chat/${roomId}`,
+      );
+      socketInstance.onopen = () => {
+        console.log('WebSocket 연결 성공');
+      };
+      socketInstance.onmessage = event => {
+        const message = JSON.parse(event.data);
+        setMessages(prevMessages => [...prevMessages, message]);
+      };
+      socketInstance.onerror = error => {
+        console.error('WebSocket 오류:', error);
+      };
+      socketInstance.onclose = event => {
+        console.log('WebSocket 연결 종료:', event);
       };
 
-      sendMessage(newMessage);
-      setMessages((prev) => [...prev, newMessage]);
-      setMessageInput(""); // 입력창 비우기
+      setSocket(socketInstance);
+
+      return () => {
+        socketInstance.close();
+      };
+    }
+  }, [roomId]);
+
+  const sendMessage = (user, longValue, messageContent) => {
+    if (socket && messageContent) {
+      // 메시지 포맷: string long string
+      const formattedMessage = `${user}:${longValue}:${messageContent}`;
+
+      // 메시지를 문자열로 변환하여 전송
+      socket.send(formattedMessage);
+
+      // 로컬 상태에도 문자열로 저장
+      setMessages(prevMessages => [
+        ...prevMessages,
+        {content: formattedMessage},
+      ]);
+    }
+  };
+
+  return {messages, sendMessage};
+};
+
+// 채팅방 목록 컴포넌트
+const Dm = () => {
+  const [roomId, setRoomId] = useState(null);
+  const [messageInput, setMessageInput] = useState('');
+  const [responseData, setResponseData] = useState(null);
+  const [translatedMessage, setTranslatedMessage] = useState('');
+
+  // WebSocket hook 사용
+  const {messages, sendMessage} = useWebSocket(roomId);
+
+  // POST 요청 함수
+  const handlePostRequest = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+
+      const response = await fetch('https://mixmix2.store/api/chat-rooms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          roomName: 'test room',
+          toMemberId: 1,
+        }),
+      });
+      const data = await response.json();
+      setResponseData(data);
+      console.log('POST Response:', data);
+    } catch (error) {
+      console.error('POST Request Error:', error);
+    }
+  };
+  // 번역 요청 함수
+  const handleTranslate = async () => {
+    if (!messageInput.trim()) return;
+
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      console.log('Access Token:', accessToken);
+      console.log('메세지인풋: ', messageInput);
+
+      const response = await fetch('https://mixmix2.store/api/translations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          text: messageInput,
+          targetLang: 'EN',
+        }),
+      });
+      console.log('응답 상태: ', response.status); // 응답 상태 코드 확인
+
+      const result = await response.json();
+      console.log('번역 API 응답 데이터: ', JSON.stringify(result, null, 2));
+
+      if (result.translations?.length > 0) {
+        const translatedText = result.translations[0]?.text || '번역 결과 없음';
+        setTranslatedMessage(translatedText); // 번역된 메시지 설정
+      } else {
+        console.log('번역 결과 없음');
+      }
+    } catch (error) {
+      console.error('번역 오류:', error);
+    }
+  };
+
+  // GET 요청 함수
+  const handleGetRequest = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('accessToken');
+      const response = await fetch('https://mixmix2.store/api/chat-rooms', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = await response.json();
+      setResponseData(data);
+      console.log('GET Response:', data);
+    } catch (error) {
+      console.error('GET Request Error:', error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={item.sender === "YourKakaoUserId" ? styles.myMessage : styles.theirMessage}>
-            <Text>{item.content}</Text>
-          </View>
-        )}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={messageInput}
-          onChangeText={setMessageInput}
-          placeholder="메시지를 입력하세요"
-        />
-        <Pressable style={styles.sendButton} onPress={handleSendMessage}>
-          <Text style={styles.sendButtonText}>전송</Text>
-        </Pressable>
+      <Text style={styles.title}>채팅방 API 요청</Text>
+
+      {/* 채팅방 목록 */}
+      <View style={styles.chatList}>
+        <Button title="채팅방 2" onPress={() => setRoomId(2)} />
+        <Button title="채팅방 3" onPress={() => setRoomId(3)} />
       </View>
+
+      {/* 채팅방 ID 표시 */}
+      {roomId && (
+        <Text style={styles.roomIdText}>현재 채팅방 ID: {roomId}</Text>
+      )}
+
+      {/* 받은 메시지 목록 */}
+      {messages.length > 0 && (
+        <ScrollView style={styles.messagesContainer}>
+          <Text style={styles.responseText}>받은 메시지:</Text>
+          {messages.map((msg, index) => (
+            <Text key={index} style={styles.messageText}>
+              {msg.content}
+            </Text>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* 텍스트 입력창 */}
+      <MessageInput
+        messageInput={messageInput}
+        setMessageInput={setMessageInput}
+        sendMessage={sendMessage}
+      />
+      {/* 번역 버튼 */}
+      <Button title="번역" onPress={handleTranslate} />
+
+      {/* 번역된 메시지 */}
+      {translatedMessage ? (
+        <Text style={styles.translatedText}>
+          번역된 메시지: {translatedMessage}
+        </Text>
+      ) : null}
+
+      {/* 응답 데이터 */}
+      {responseData && (
+        <View style={styles.responseContainer}>
+          <Text style={styles.responseText}>응답 데이터:</Text>
+          <Text style={styles.responseData}>
+            {JSON.stringify(responseData, null, 2)}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
 
+// 메시지 입력 컴포넌트
+const MessageInput = ({messageInput, setMessageInput, sendMessage}) => {
+  const handleChange = text => setMessageInput(text);
+
+  const handleSend = () => {
+    // 예시로 사용자 이름 "hyeon", long 값 2, 그리고 입력된 메시지를 전송
+    sendMessage('hyeon', 2, messageInput);
+    setMessageInput(''); // 전송 후 입력창 비우기
+  };
+
+  return (
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        value={messageInput}
+        onChangeText={handleChange}
+        placeholder="메시지를 입력하세요"
+      />
+      <Button title="전송" onPress={handleSend} />
+    </View>
+  );
+};
+
+// 스타일링
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 20 
-},
-  myMessage: { 
-    alignSelf: "flex-end", 
-    padding: 10, 
-    backgroundColor: "#d1f5d3", 
-    marginVertical: 5, 
-    borderRadius: 10 
-},
-  theirMessage: { 
-    alignSelf: "flex-start", 
-    padding: 10, 
-    backgroundColor: "#f1f1f1", 
-    marginVertical: 5, 
-    borderRadius: 10 
-},
-  inputContainer: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginTop: 10 
-},
-  input: { 
-    flex: 1, 
-    borderWidth: 1, 
-    borderColor: "#ccc", 
-    borderRadius: 10, 
-    padding: 10 
-},
-  sendButton: { 
-    marginLeft: 10, 
-    backgroundColor: "#007BFF", 
-    padding: 10, 
-    borderRadius: 10 
-},
-  sendButtonText: { 
-    color: "#fff", 
-    fontWeight: "bold" 
-},
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  chatList: {
+    marginBottom: 20,
+  },
+  roomIdText: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 10,
+    fontWeight: '600',
+  },
+  messagesContainer: {
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    width: '100%',
+    maxHeight: 200,
+    overflow: 'scroll',
+  },
+  messageText: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+  input: {
+    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  responseContainer: {
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    width: '100%',
+    maxHeight: 200,
+    overflow: 'scroll',
+  },
+  responseText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  responseData: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 10,
+  },
 });
 
 export default Dm;

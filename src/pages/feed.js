@@ -60,7 +60,6 @@ const Feed = ({route}) => {
 
     fetchFeedDetails();
   }, [feedId]);
-
   const handleSendComment = async () => {
     if (!commentText.trim()) {
       Alert.alert('오류', '댓글 내용을 입력해주세요.');
@@ -75,15 +74,14 @@ const Feed = ({route}) => {
     }
 
     try {
-      const payload = {
-        commentsSaveReqDto: {
-          contents: commentText,
-          feedId: feedId, // feedId 그대로 사용
-        },
-      };
+      console.log('Access Token:', accessToken);
 
-      console.log('댓글 작성 API 호출: https://mixmix2.store/api/comments');
-      console.log('전송 데이터:', JSON.stringify(payload));
+      // 요청 바디 로그 출력
+      const requestBody = {
+        contents: commentText,
+        feedId: feedId,
+      };
+      console.log('Request Body:', JSON.stringify(requestBody, null, 2)); // JSON으로 보기 좋게 출력
 
       const response = await fetch('https://mixmix2.store/api/comments', {
         method: 'POST',
@@ -91,33 +89,27 @@ const Feed = ({route}) => {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestBody),
       });
 
-      const responseText = await response.text(); // 응답을 텍스트로 출력
-      console.log('응답 상태 코드:', response.status);
-      console.log('응답 데이터:', responseText);
+      console.log('Response Status:', response.status);
+
+      // 응답 처리
+      const responseData = await response.json(); // 응답을 JSON으로 읽음
+      console.log('Response Data:', responseData);
 
       if (response.ok) {
-        const result = JSON.parse(responseText);
-
-        const newComment = {
-          commentWriterId: result.data.commentWriterId,
-          nickname: result.data.nickname,
-          picture: result.data.picture,
-          contents: result.data.contents,
-          createdAt: result.data.createdAt,
-          nationality: result.data.nationality,
-        };
-
-        setComments(prevComments => [newComment, ...prevComments]);
-        setCommentText('');
+        console.log('New Comment:', responseData);
+        setComments(prevComments => [responseData.data, ...prevComments]); // 댓글 리스트에 새 댓글 추가
+        setCommentText(''); // 입력 필드 초기화
       } else {
-        const errorData = JSON.parse(responseText);
-        Alert.alert('오류', errorData.message || '댓글 작성에 실패했습니다.');
+        Alert.alert(
+          '오류',
+          responseData.message || '댓글 작성에 실패했습니다.',
+        );
       }
     } catch (error) {
-      console.error('댓글 작성 오류:', error);
+      console.error('Network Error:', error);
       Alert.alert('오류', '네트워크 오류가 발생했습니다.');
     }
   };
